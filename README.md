@@ -2,7 +2,7 @@
 
 Intelligent Resume Tailoring for IT/DevOps/AI Governance Roles
 
-[Version: v2.3.0] [Python: 3.9+] [License: Dual MPL-2.0/Commercial]
+[Python: 3.9+] [License: Dual MPL-2.0/Commercial]
 
 ---
 
@@ -135,7 +135,7 @@ Access the **Settings** tab in the application to configure the match threshold:
 Edit the value in `config/settings.py`:
 ```python
 # In config/settings.py
-MIN_MATCH_THRESHOLD = 70  # Default: 70%
+MIN_MATCH_THRESHOLD = 80  # Default: 80%
 ```
 
 #### How Match Threshold Works
