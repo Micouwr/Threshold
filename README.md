@@ -204,6 +204,6 @@ CareerForge AI is available under two licensing options:
 - Includes priority support and additional features
 - Ideal for businesses and enterprise use
 
-For commercial licensing inquiries, please contact [your contact information].
+For commercial licensing inquiries, please contact via https://github.com/Micouwr.
 
 See LICENSE_MPL.md and LICENSE_COMMERCIAL.md for complete license terms.
