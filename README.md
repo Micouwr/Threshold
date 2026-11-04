@@ -8,7 +8,7 @@ Intelligent Resume Tailoring for IT/DevOps/AI Governance Roles
 
 ## Overview
 
-CareerForge AI is an intelligent tool that helps you tailor your resume for specific job applications using Google's Gemini AI. By analyzing the job description and your resume, it creates customized versions that align with the position requirements while preserving all factual information from your original resume.
+CareerForge AI is an intelligent tool that helps you tailor your resume for specific job applications using Google's Gemini AI (Gemini 3.8 Flash). By analyzing the job description and your resume, it creates customized versions that align with the position requirements while preserving all factual information from your original resume.
 
 Key Features:
 - AI-powered resume compatibility scoring
@@ -41,7 +41,7 @@ pip install reportlab
 ### Step 2: Configure API Key
 ```bash
 cp .env.example .env
-# Edit .env and add your GEMINI_API_KEY from https://makersuite.google.com/app/apikey
+# Edit .env and add your GEMINI_API_KEY from https://aistudio.google.com/apikey
 ```
 
 ### Step 3: Launch Application
