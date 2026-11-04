@@ -1,6 +1,12 @@
 import os
 import google.generativeai as genai
 
+# Central model pin; falls back to env/default when run standalone
+try:
+    from config.settings import GEMINI_MODEL
+except ImportError:
+    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+
 DIAGNOSTIC_MODE = False
 
 def tailor_resume(resume_text: str, job_description: str, match_data: dict) -> str:
@@ -27,7 +33,7 @@ def tailor_resume(resume_text: str, job_description: str, match_data: dict) -> s
     
     # Configure Gemini with timeout
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    model = genai.GenerativeModel(GEMINI_MODEL)
     
     # Build tailoring prompt
     prompt = f"""
@@ -95,7 +101,7 @@ def generate_cover_letter(resume_text: str, job_description: str, match_data: di
     
     # Configure Gemini with timeout
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    model = genai.GenerativeModel(GEMINI_MODEL)
     
     prompt = f"""
     Write a professional cover letter for this job using ONLY information from the resume.
