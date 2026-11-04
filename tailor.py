@@ -34,7 +34,7 @@ def load_user_prompt_template(prompt_name="custom_template.txt.j2"):
     env = Environment(loader=FileSystemLoader(str(user_prompts_dir)))
     return env.get_template(prompt_name)
 
-def process_and_tailor_from_gui(resume_text, job_description, output_path, role_level="Standard", custom_prompt=None):
+def process_and_tailor_from_gui(resume_text, job_description, output_path, role_level="Standard", custom_prompt=None, job_title=None, company_name=None):
     """
     Process and tailor a resume for a job application from GUI.
     
@@ -44,6 +44,8 @@ def process_and_tailor_from_gui(resume_text, job_description, output_path, role_
         output_path: Path where outputs will be saved
         role_level: Role level for template selection
         custom_prompt: Optional custom prompt template name
+        job_title: Job title (from GUI entry or AI extraction)
+        company_name: Company name (from GUI entry or AI extraction)
         
     Returns:
         Dict with resume_text and cover_letter keys
@@ -65,8 +67,8 @@ def process_and_tailor_from_gui(resume_text, job_description, output_path, role_
         # Render prompt with variables
         prompt = template.render(
             role_level=role_level,
-            company_name="Target Company",  # Placeholder - should extract from job_description
-            job_title="Target Role",          # Placeholder - should extract from job_description
+            company_name=company_name or "Target Company",
+            job_title=job_title or "Target Role",
             job_description=job_description,
             resume_text=resume_text
         )

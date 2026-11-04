@@ -1669,8 +1669,8 @@ RECOMMENDATIONS:
         try:
             # Process and tailor
             result = process_and_tailor_from_gui(
-                resume_text, job_description, OUTPUT_PATH, 
-                role_level, custom_prompt
+                resume_text, job_description, OUTPUT_PATH,
+                role_level, custom_prompt, job_title, company
             )
             
             # Check for required fields
