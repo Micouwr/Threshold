@@ -2455,87 +2455,33 @@ Format your response exactly as follows:
             self._log_message(f"Export error: {e}", "error")
     
     def _export_as_pdf(self, job_title, company):
-        """Export current tailored documents as PDF"""
+        """Export current tailored documents as styled PDF"""
         try:
-            # Import reportlab here to avoid issues if not installed
-            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
-            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-            from reportlab.lib.units import inch
-            from reportlab.lib.pagesizes import letter
-            from reportlab.lib.enums import TA_CENTER, TA_LEFT
-            
+            from resume_formatter import format_resume_file
+
             # Ask user for save location
             file_path = filedialog.asksaveasfilename(
                 defaultextension=".pdf",
                 filetypes=[("PDF files", "*.pdf"), ("All files", "*.*")],
                 initialfile=f"{company}_{job_title}_Application.pdf"
             )
-            
+
             if not file_path:
                 return
-            
-            # Create PDF document
-            doc = SimpleDocTemplate(file_path, pagesize=letter)
-            styles = getSampleStyleSheet()
-            
-            # Custom styles
-            title_style = ParagraphStyle(
-                'CustomTitle',
-                parent=styles['Heading1'],
-                alignment=TA_CENTER,
-                fontSize=16,
-                spaceAfter=30
+
+            _, pages = format_resume_file(
+                self.current_selected_app['resume_path'],
+                file_path,
+                fmt="pdf",
+                cover_letter_path=self.current_selected_app.get('cover_letter_path'),
             )
-            
-            heading_style = ParagraphStyle(
-                'CustomHeading',
-                parent=styles['Heading2'],
-                fontSize=14,
-                spaceBefore=20,
-                spaceAfter=10
-            )
-            
-            # Custom normal style with smaller bullet points
-            normal_style = ParagraphStyle(
-                'CustomNormal',
-                parent=styles['Normal'],
-                bulletFontSize=8,  # Smaller bullet points
-                bulletIndent=10,
-                leftIndent=20
-            )
-            
-            # Build document content
-            story = []
-            
-            # Tailored Resume
-            story.append(Paragraph("Tailored Resume", heading_style))
-            
-            # Read resume content
-            with open(self.current_selected_app['resume_path'], 'r', encoding='utf-8') as f:
-                resume_content = f.read()
-            
-            # Add resume content
-            resume_para = Paragraph(resume_content.replace('\n', '<br/>'), normal_style)
-            story.append(resume_para)
-            story.append(PageBreak())
-            
-            # Cover Letter
-            story.append(Paragraph("Cover Letter", heading_style))
-            
-            # Read cover letter content
-            with open(self.current_selected_app['cover_letter_path'], 'r', encoding='utf-8') as f:
-                cover_letter_content = f.read()
-            
-            # Add cover letter content
-            cover_letter_para = Paragraph(cover_letter_content.replace('\n', '<br/>'), normal_style)
-            story.append(cover_letter_para)
-            
-            # Build PDF
-            doc.build(story)
-            
-            messagebox.showinfo("PDF Export", f"Documents exported successfully to:\n{file_path}")
-            self._log_message(f"PDF exported to: {file_path}", "info")
-            
+
+            msg = f"Documents exported successfully to:\n{file_path}\n\nResume: {pages} page(s)"
+            if pages and pages > 2:
+                msg += "\n\nNote: the resume runs over 2 pages. Consider trimming older roles."
+            messagebox.showinfo("PDF Export", msg)
+            self._log_message(f"PDF exported to: {file_path} ({pages} pages)", "info")
+
         except ImportError:
             messagebox.showerror("PDF Export Error", "ReportLab library not found. Please install it with: pip install reportlab")
             self._log_message("ReportLab not installed for PDF export", "error")
@@ -2543,67 +2489,30 @@ Format your response exactly as follows:
             raise  # Re-raise to be caught by parent method
     
     def _export_as_word(self, job_title, company):
-        """Export current tailored documents as Word document"""
+        """Export current tailored documents as styled Word document"""
         try:
-            from docx import Document
-            from docx.shared import Pt
-            from docx.enum.text import WD_ALIGN_PARAGRAPH
-            
+            from resume_formatter import format_resume_file
+
             # Ask user for save location
             file_path = filedialog.asksaveasfilename(
                 defaultextension=".docx",
                 filetypes=[("Word files", "*.docx"), ("All files", "*.*")],
                 initialfile=f"{company}_{job_title}_Application.docx"
             )
-            
+
             if not file_path:
                 return
-            
-            # Create Word document
-            doc = Document()
-            
-            # Add title
-            title = doc.add_heading('Job Application Documents', 0)
-            title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            
-            # Add company and job title info
-            info_para = doc.add_paragraph()
-            info_run = info_para.add_run(f'{company} - {job_title}')
-            info_run.bold = True
-            
-            # Add tailored resume
-            doc.add_heading('Tailored Resume', level=1)
-            
-            # Read resume content
-            with open(self.current_selected_app['resume_path'], 'r', encoding='utf-8') as f:
-                resume_content = f.read()
-            
-            # Add resume content as paragraphs
-            for line in resume_content.split('\n'):
-                if line.strip():
-                    doc.add_paragraph(line)
-            
-            # Add page break
-            doc.add_page_break()
-            
-            # Add cover letter
-            doc.add_heading('Cover Letter', level=1)
-            
-            # Read cover letter content
-            with open(self.current_selected_app['cover_letter_path'], 'r', encoding='utf-8') as f:
-                cover_letter_content = f.read()
-            
-            # Add cover letter content as paragraphs
-            for line in cover_letter_content.split('\n'):
-                if line.strip():
-                    doc.add_paragraph(line)
-            
-            # Save document
-            doc.save(file_path)
-            
+
+            format_resume_file(
+                self.current_selected_app['resume_path'],
+                file_path,
+                fmt="docx",
+                cover_letter_path=self.current_selected_app.get('cover_letter_path'),
+            )
+
             messagebox.showinfo("Word Export", f"Documents exported successfully to:\n{file_path}")
             self._log_message(f"Word document exported to: {file_path}", "info")
-            
+
         except ImportError:
             messagebox.showerror("Word Export Error", "python-docx library not found. Please install it with: pip install python-docx")
             self._log_message("python-docx not installed for Word export", "error")
