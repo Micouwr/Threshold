@@ -1469,25 +1469,27 @@ BEST PRACTICES:
             
             self.match_data = analyze_match(resume_text, job_description)
             score = self.match_data.get('overall_score', 0)
-            
+            verdict = self.match_data.get('verdict', '')
+
             # Restore button and show results
             self.analyze_button.config(text=original_text, state='normal')
             self.status_label.config(text="Analysis complete")
-            
-            # Update match display
-            self.match_label.config(text=f"Match Score: {score}%")
-            
-            # Color coding based on score
+
+            # Update match display with verdict
+            verdict_display = f"{verdict.title()} Match: {score}%" if verdict else f"Match Score: {score}%"
+            self.match_label.config(text=verdict_display)
+
+            # Color coding based on score vs threshold
             if score >= self.current_threshold:
                 self.match_label.config(foreground="green")
                 self.start_button.config(state='normal')
-                message = f"Strong match ({score}%)! Enter job title/company and click 'Start Tailoring' to proceed."
-                self._log_message(f"Match analysis complete: {score}% (threshold met)", "info")
+                message = f"{verdict_display} (threshold {self.current_threshold}%). Enter job title/company and click 'Start Tailoring' to proceed."
+                self._log_message(f"Match analysis complete: {score}% {verdict} (threshold met)", "info")
             else:
                 self.match_label.config(foreground="red")
                 self.start_button.config(state='disabled')
-                message = f"Match score {score}% is below threshold ({self.current_threshold}%). Improve resume or consider different role."
-                self._log_message(f"Match analysis complete: {score}% (below threshold)", "warning")
+                message = f"{verdict_display} is below threshold ({self.current_threshold}%). Improve resume or consider different role."
+                self._log_message(f"Match analysis complete: {score}% {verdict} (below threshold)", "warning")
             
             # Show detailed breakdown
             self._show_match_details()
@@ -1518,69 +1520,35 @@ BEST PRACTICES:
         
         # Build details content
         score = self.match_data.get('overall_score', 0)
-        
-        # Handle complex data structures from AI response
-        skills_data = self.match_data.get('skills_match', {})
-        exp_data = self.match_data.get('experience_match', {})
-        keywords_data = self.match_data.get('keywords_match', {})
-        
-        # Extract scores and analysis
-        skills_score = skills_data.get('score', 'N/A') if isinstance(skills_data, dict) else skills_data
-        exp_score = exp_data.get('score', 'N/A') if isinstance(exp_data, dict) else exp_data
-        keywords_score = keywords_data.get('score', 'N/A') if isinstance(keywords_data, dict) else keywords_data
-        
-        # Extract analysis text
-        skills_analysis = skills_data.get('analysis', []) if isinstance(skills_data, dict) else []
-        exp_analysis = exp_data.get('analysis', []) if isinstance(exp_data, dict) else []
-        keywords_analysis = keywords_data.get('analysis', []) if isinstance(keywords_data, dict) else []
-        
-        # Format analysis as readable text
-        skills_text = '\n'.join([f'* {item}' if isinstance(item, str) else str(item) for item in skills_analysis]) if skills_analysis else 'No detailed analysis provided.'
-        exp_text = '\n'.join([f'* {item}' if isinstance(item, str) else str(item) for item in exp_analysis]) if exp_analysis else 'No detailed analysis provided.'
-        keywords_text = '\n'.join([f'* {item}' if isinstance(item, str) else str(item) for item in keywords_analysis]) if keywords_analysis else 'No detailed analysis provided.'
-        
-        # Get lists
-        strengths = self.match_data.get('strengths', ['No strengths identified'])
-        gaps = self.match_data.get('gaps', ['No gaps identified'])
-        recommendations = self.match_data.get('recommendations', ['No recommendations'])
-        
-        # Format lists
-        strengths_text = '\n'.join([f'* {item}' if isinstance(item, str) else str(item) for item in strengths])
-        gaps_text = '\n'.join([f'* {item}' if isinstance(item, str) else str(item) for item in gaps])
-        recommendations_text = '\n'.join([f'* {item}' if isinstance(item, str) else str(item) for item in recommendations])
-        
-        details = f"""MATCH SUMMARY
-=============
-Overall Score: {score}%
-Skills Match: {skills_score}%
-Experience Match: {exp_score}%
-Keywords Match: {keywords_score}%
+        verdict = self.match_data.get('verdict', 'UNKNOWN')
 
-SKILLS ANALYSIS:
-===============
-{skills_text}
+        def fmt_list(items, empty_msg):
+            if not items:
+                return empty_msg
+            return '\n'.join([f'* {item}' if isinstance(item, str) else str(item) for item in items])
 
-EXPERIENCE ANALYSIS:
-==================
-{exp_text}
+        evidence = self.match_data.get('evidence', [])
+        gaps = self.match_data.get('gaps', [])
 
-KEYWORDS ANALYSIS:
-=================
-{keywords_text}
+        evidence_text = fmt_list(evidence, 'No evidence provided.')
+        gaps_text = fmt_list(gaps, 'No meaningful gaps identified.')
 
-STRENGTHS:
-==========
-{strengths_text}
+        threshold_status = "MEETS threshold - tailoring unlocked" if score >= self.current_threshold else "BELOW threshold - tailoring locked"
+
+        details = f"""MATCH ANALYSIS
+==============
+Verdict: {verdict} ({score}%)
+Threshold: {self.current_threshold}% - {threshold_status}
+
+WHY THIS MATCHES (based solely on the resume):
+===============================================
+{evidence_text}
 
 GAPS:
 =====
 {gaps_text}
-
-RECOMMENDATIONS:
-================
-{recommendations_text}
 """
-        
+
         details_text.insert('1.0', details)
         details_text.config(state='disabled')
         

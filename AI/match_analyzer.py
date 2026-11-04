@@ -33,53 +33,38 @@ def analyze_match(resume_text: str, job_description: str) -> dict:
     
     # Build analysis prompt
     prompt = f"""
-    Analyze this resume against the job description and provide a detailed match analysis.
-    Return ONLY a valid JSON object with these exact keys: overall_score, skills_match, experience_match, keywords_match, recommendations, strengths, gaps.
-    
-    The skills_match, experience_match, and keywords_match should each be objects with 'score' (integer 0-100) and 'analysis' (array of strings) keys.
-    The recommendations, strengths, and gaps should each be arrays of strings.
-    
+    Analyze this resume against the job description and provide a match analysis.
+    Return ONLY a valid JSON object with these exact keys: overall_score, verdict, evidence, gaps.
+
+    - overall_score: integer 0-100, your assessment of how well the resume matches the job.
+    - verdict: one of "STRONG", "MODERATE", "WEAK".
+      STRONG = the resume clearly covers the core requirements.
+      MODERATE = plausible fit but with notable gaps.
+      WEAK = significant gaps against core requirements.
+    - evidence: array of 3-4 strings. Each must cite a SPECIFIC fact from the resume
+      AND the SPECIFIC job requirement it matches. Base everything SOLELY on what the
+      resume states. Do not infer, assume, or invent qualifications not present in the resume.
+      If the resume does not state something, treat it as absent.
+    - gaps: array of strings. Each names a job requirement the resume does not clearly
+      cover, stated plainly. If there are no meaningful gaps, return an empty array.
+
     Example format:
     {{
         "overall_score": 85,
-        "skills_match": {{
-            "score": 90,
-            "analysis": [
-                "Strong match in Python and JavaScript",
-                "Good match in SQL proficiency"
-            ]
-        }},
-        "experience_match": {{
-            "score": 80,
-            "analysis": [
-                "5+ years in AI development matches requirement",
-                "Experience with GPT APIs is directly relevant"
-            ]
-        }},
-        "keywords_match": {{
-            "score": 88,
-            "analysis": [
-                "Keywords 'Python', 'JavaScript', 'SQL' found in both",
-                "'GPT APIs' and 'PyInstaller' are highly relevant"
-            ]
-        }},
-        "recommendations": [
-            "Consider highlighting project management experience more prominently",
-            "Add specific metrics to quantify achievements"
-        ],
-        "strengths": [
-            "Strong technical skills alignment with job requirements",
-            "Relevant experience in AI development"
+        "verdict": "STRONG",
+        "evidence": [
+            "Resume shows 20+ years in technical operations leadership; posting requires 10+ years leading support operations",
+            "Resume lists Document360 knowledge base build cutting dealer questions from 100 to 65/day; posting asks for experience improving support processes with measurable results",
+            "Resume includes ISO/IEC 42001 AI governance fundamentals certification; posting prefers AI governance knowledge"
         ],
         "gaps": [
-            "Limited explicit project management experience mentioned",
-            "No specific metrics provided for achievements"
+            "Posting requires AWS Solutions Architect certification; resume lists AWS Cloud Practitioner Essentials only"
         ]
     }}
-    
+
     RESUME:
     {resume_text}
-    
+
     JOB DESCRIPTION:
     {job_description}
     """
@@ -221,15 +206,12 @@ if __name__ == "__main__":
         if DIAGNOSTIC_MODE:
             print("[DIAGNOSTIC] Testing AI match analysis...")
         result = analyze_match(test_resume, test_job)
-        
+
         if DIAGNOSTIC_MODE:
             print("\n[DIAGNOSTIC] Test completed successfully!")
             print(f"Overall Match Score: {result.get('overall_score', 'N/A')}%")
-            print(f"Skills Match: {result.get('skills_match', 'N/A')}%")
-            print(f"Experience Match: {result.get('experience_match', 'N/A')}%")
-            print(f"Keywords Match: {result.get('keywords_match', 'N/A')}%")
-            print(f"\nRecommendations: {result.get('recommendations', [])}")
-            print(f"Strengths: {result.get('strengths', [])}")
+            print(f"Verdict: {result.get('verdict', 'N/A')}")
+            print(f"\nEvidence: {result.get('evidence', [])}")
             print(f"Gaps: {result.get('gaps', [])}")
         
     except Exception as e:
