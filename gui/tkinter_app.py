@@ -2444,10 +2444,11 @@ Format your response exactly as follows:
                 cover_letter_path=self.current_selected_app.get('cover_letter_path'),
             )
 
-            msg = f"Documents exported successfully to:\n{file_path}\n\nResume: {pages} page(s)"
             if pages and pages > 2:
-                msg += "\n\nNote: the resume runs over 2 pages. Consider trimming older roles."
-            messagebox.showinfo("PDF Export", msg)
+                self._offer_condense_flow(file_path)
+            else:
+                msg = f"Documents exported successfully to:\n{file_path}\n\nResume: {pages} page(s)"
+                messagebox.showinfo("PDF Export", msg)
             self._log_message(f"PDF exported to: {file_path} ({pages} pages)", "info")
 
         except ImportError:
@@ -2455,6 +2456,115 @@ Format your response exactly as follows:
             self._log_message("ReportLab not installed for PDF export", "error")
         except Exception as e:
             raise  # Re-raise to be caught by parent method
+
+    def _offer_condense_flow(self, file_path):
+        """Resume ran over 2 pages: offer AI-suggested condense options."""
+        from condense import suggest_condense_options
+
+        proceed = messagebox.askyesno(
+            "Resume Over 2 Pages",
+            "The resume runs over 2 pages.\n\n"
+            "Would you like the AI to suggest specific options for tightening it?\n"
+            "You pick which suggestions to apply; nothing is cut without your approval.",
+        )
+        if not proceed:
+            messagebox.showinfo(
+                "PDF Export",
+                f"Documents exported successfully to:\n{file_path}\n\nNote: resume is over 2 pages.",
+            )
+            return
+
+        try:
+            with open(self.current_selected_app['resume_path'], 'r', encoding='utf-8') as f:
+                resume_text = f.read()
+            options = suggest_condense_options(resume_text)
+        except Exception as e:
+            messagebox.showerror("Condense Error", f"Could not get condense suggestions: {e}")
+            return
+
+        if not options:
+            messagebox.showinfo("Condense", "The AI had no condense suggestions.")
+            return
+
+        self._show_condense_dialog(options, resume_text, file_path)
+
+    def _show_condense_dialog(self, options, resume_text, file_path):
+        """Show AI condense options with checkboxes; apply the selected ones."""
+        dialog = tk.Toplevel(self.master)
+        dialog.title("Condense Resume - AI Suggestions")
+        dialog.geometry("650x500")
+
+        ttk.Label(
+            dialog,
+            text="The AI suggests these options to fit 2 pages.\nCheck the ones you want applied:",
+            font=('Arial', 10),
+        ).pack(padx=10, pady=10, anchor=tk.W)
+
+        vars_frame = ttk.Frame(dialog)
+        vars_frame.pack(padx=10, pady=5, fill=tk.BOTH, expand=True)
+
+        canvas = tk.Canvas(vars_frame)
+        scrollbar = ttk.Scrollbar(vars_frame, orient=tk.VERTICAL, command=canvas.yview)
+        inner = ttk.Frame(canvas)
+        inner.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.create_window((0, 0), window=inner, anchor=tk.NW)
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        check_vars = []
+        for opt in options:
+            var = tk.BooleanVar(value=False)
+            label = (
+                f"[{opt.get('type', '').upper()}] {opt.get('section', '')}: "
+                f"{opt.get('description', '')} "
+                f"(~{opt.get('lines_saved_estimate', '?')} lines)"
+            )
+            cb = ttk.Checkbutton(inner, text=label, variable=var, wraplength=560,
+                                 justify=tk.LEFT)
+            cb.pack(anchor=tk.W, padx=5, pady=4)
+            check_vars.append((var, opt))
+
+        def on_apply():
+            from condense import apply_condense_options
+            from resume_formatter import format_resume_file
+
+            selected = [opt for var, opt in check_vars if var.get()]
+            if not selected:
+                messagebox.showwarning("No Selection", "Check at least one option to apply.")
+                return
+            try:
+                dialog.config(cursor="wait")
+                dialog.update()
+                revised = apply_condense_options(resume_text, selected)
+                # Save revised text back so the source of truth updates
+                with open(self.current_selected_app['resume_path'], 'w', encoding='utf-8') as f:
+                    f.write(revised)
+                _, pages = format_resume_file(
+                    self.current_selected_app['resume_path'],
+                    file_path,
+                    fmt="pdf",
+                    cover_letter_path=self.current_selected_app.get('cover_letter_path'),
+                )
+                dialog.destroy()
+                msg = f"Condensed resume exported to:\n{file_path}\n\nResume: {pages} page(s)"
+                if pages and pages > 2:
+                    msg += "\n\nStill over 2 pages. You can run condense again."
+                messagebox.showinfo("Condense Complete", msg)
+                self._log_message(f"Condense applied ({len(selected)} options), now {pages} pages", "info")
+            except Exception as e:
+                dialog.config(cursor="")
+                messagebox.showerror("Condense Error", f"Failed to apply: {e}")
+            finally:
+                try:
+                    dialog.config(cursor="")
+                except Exception:
+                    pass
+
+        btn_frame = ttk.Frame(dialog)
+        btn_frame.pack(pady=10)
+        ttk.Button(btn_frame, text="Apply Selected", command=on_apply).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="Keep As Is", command=dialog.destroy).pack(side=tk.LEFT, padx=5)
     
     def _export_as_word(self, job_title, company):
         """Export current tailored documents as styled Word document"""
