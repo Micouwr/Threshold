@@ -189,6 +189,12 @@ Common issues and solutions:
 
 ---
 
+## Related project
+
+[AI Ticket Triage](https://github.com/Micouwr/AI-TRIAGE_Bot) applies the same principle to a different problem: AI ticket classification with escalation rules, PII redaction, and human review triggers enforced in code. Both projects share one design philosophy: the AI proposes, rules and humans dispose.
+
+---
+
 ## Licensing
 
 CareerForge AI is available under two licensing options:
