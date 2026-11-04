@@ -13,7 +13,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 try:
     from AI.match_analyzer import analyze_match
-    from AI.tailor_engine import tailor_resume, generate_cover_letter
+    from tailor import process_and_tailor_from_gui
     from config.settings import MIN_MATCH_THRESHOLD
     print("SUCCESS: All imports working")
     print(f"MIN_MATCH_THRESHOLD: {MIN_MATCH_THRESHOLD}")
