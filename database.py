@@ -1,8 +1,5 @@
 import sqlite3
-import json
-from pathlib import Path
-from datetime import datetime
-from config.settings import DB_PATH, OUTPUT_PATH
+from config.settings import DB_PATH
 
 class DatabaseManager:
     def __init__(self):

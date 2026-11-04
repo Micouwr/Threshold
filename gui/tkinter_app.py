@@ -6,7 +6,6 @@ import os
 import sys
 import threading
 import queue
-import shutil
 import re
 from pathlib import Path
 from datetime import datetime
@@ -18,8 +17,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "utils"))
 
-from config.settings import OUTPUT_PATH, DB_PATH, MIN_MATCH_THRESHOLD
-import config.settings
+from config.settings import OUTPUT_PATH, MIN_MATCH_THRESHOLD
 from database import DatabaseManager
 from tailor import process_and_tailor_from_gui
 from models.resume_model import ResumeModel
@@ -114,7 +112,7 @@ class JobAppTkinter:
                 self.master.iconphoto(True, icon_image)
                 return
                 
-        except Exception as e:
+        except Exception:
             # Silently fail if icon can't be set - not critical
             pass
     
@@ -1957,25 +1955,6 @@ Format your response exactly as follows:
         tab.columnconfigure(1, weight=1)
         tab.rowconfigure(5, weight=1)
     
-    def save_custom_prompt(self):
-        """Save custom prompt template to file."""
-        prompt_name = self.prompt_name_entry.get().strip()
-        if not prompt_name.endswith('.txt.j2'):
-            prompt_name += '.txt.j2'
-        
-        if not prompt_name or prompt_name == '.txt.j2':
-            messagebox.showerror("Error", "Please enter a valid prompt name.")
-            return
-        
-        template_content = self.prompt_text.get('1.0', tk.END).strip()
-        
-        try:
-            with open(f"prompts/user/{prompt_name}", 'w') as f:
-                f.write(template_content)
-            messagebox.showinfo("Success", f"Prompt saved as {prompt_name}")
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to save prompt: {e}")
-    
     def load_custom_prompt(self):
         """Load custom prompt template using curated dropdown (Golden Rule #5 - Security)"""
         prompts_dir = Path("prompts/user")
@@ -2454,7 +2433,7 @@ Format your response exactly as follows:
         except ImportError:
             messagebox.showerror("PDF Export Error", "ReportLab library not found. Please install it with: pip install reportlab")
             self._log_message("ReportLab not installed for PDF export", "error")
-        except Exception as e:
+        except Exception:
             raise  # Re-raise to be caught by parent method
 
     def _offer_condense_flow(self, file_path):
@@ -2594,7 +2573,7 @@ Format your response exactly as follows:
         except ImportError:
             messagebox.showerror("Word Export Error", "python-docx library not found. Please install it with: pip install python-docx")
             self._log_message("python-docx not installed for Word export", "error")
-        except Exception as e:
+        except Exception:
             raise  # Re-raise to be caught by parent method
     
     def _export_as_text(self, job_title, company):
@@ -2611,7 +2590,6 @@ Format your response exactly as follows:
                 return
             
             import zipfile
-            from io import StringIO
             
             # Create zip file with all documents
             with zipfile.ZipFile(file_path, 'w') as zipf:
@@ -2632,7 +2610,7 @@ Format your response exactly as follows:
             messagebox.showinfo("Text Export", f"Documents exported successfully to:\n{file_path}")
             self._log_message(f"Text files exported to ZIP: {file_path}", "info")
             
-        except Exception as e:
+        except Exception:
             raise  # Re-raise to be caught by parent method
     
     def _export_as_ats_optimized(self, job_title, company):
@@ -2689,7 +2667,7 @@ COVER LETTER
             messagebox.showinfo("ATS Export", f"ATS-optimized document exported successfully to:\n{file_path}")
             self._log_message(f"ATS-optimized text exported to: {file_path}", "info")
             
-        except Exception as e:
+        except Exception:
             raise  # Re-raise to be caught by parent method
     
     def _delete_selected_application(self):
@@ -2971,21 +2949,14 @@ COVER LETTER
 
 def main():
     """Main entry point for the application"""
-    print("DEBUG: Starting application...")
     root = tk.Tk()
-    print("DEBUG: Tk root created")
-    app = JobAppTkinter(root)
-    print("DEBUG: JobAppTkinter instantiated")
+    JobAppTkinter(root)
     root.mainloop()
-    print("DEBUG: Main loop ended")
 
 if __name__ == "__main__":
     try:
-        print("DEBUG: Entering main execution")
         main()
-        print("DEBUG: Exited main execution normally")
-    except Exception as e:
+    except Exception:
         import traceback
-        print(f"DEBUG: Exception in main: {e}")
         traceback.print_exc()
         input("Press Enter to continue...")

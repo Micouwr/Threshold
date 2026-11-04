@@ -48,7 +48,7 @@ def build_executable():
         else:
             print(f"  Splash screen not found at {splash_path}")
     
-    print(f" Verifying build environment...")
+    print(" Verifying build environment...")
     print("=" * 60)
     
     # Verify Python version
@@ -65,7 +65,7 @@ def build_executable():
     # Verify Pillow
     try:
         import PIL
-        print(f" Pillow (for icon conversion)")
+        print(f" Pillow {PIL.__version__} (for icon conversion)")
     except ImportError:
         print(" Pillow not found. Install with: pip install Pillow")
         return False
@@ -80,7 +80,7 @@ def build_executable():
     # Verify .env file
     env_file = ROOT_DIR / ".env"
     if env_file.exists():
-        print(f" .env configuration file found (Will NOT be bundled)")
+        print(" .env configuration file found (Will NOT be bundled)")
         print("   (This is correct - users must provide their own API keys)")
     else:
         print(f"  Warning: .env file not found at {env_file}")
@@ -96,12 +96,12 @@ def build_executable():
     print("-" * 60)
     
     # Run PyInstaller
-    print(f"\n  Running PyInstaller...")
+    print("\n  Running PyInstaller...")
     print("=" * 60)
     print(f"   Running: {' '.join(pyinstaller_cmd)}\n")
     
     try:
-        result = subprocess.run(pyinstaller_cmd, check=True, capture_output=False)
+        subprocess.run(pyinstaller_cmd, check=True, capture_output=False)
         print("\n" + "=" * 60)
         print(" Build completed successfully!")
         print("=" * 60)
@@ -111,12 +111,12 @@ def build_executable():
         print(" The executable is located in the './dist' folder.")
         print("  CRITICAL: Users must place their own '.env' file containing API keys")
         print("            in the same directory as the executable.")
-        print(f" App bundle: ./dist/CareerForgeAI.app")
+        print(" App bundle: ./dist/CareerForgeAI.app")
         
         return True
         
     except subprocess.CalledProcessError as e:
-        print(f"\n Build failed!")
+        print("\n Build failed!")
         print(f"Error code: {e.returncode}")
         return False
     except KeyboardInterrupt:

@@ -28,7 +28,7 @@ def analyze_match(resume_text: str, job_description: str) -> dict:
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel(GEMINI_MODEL)
-    except Exception as e:
+    except Exception:
         raise
     
     # Build analysis prompt
@@ -92,7 +92,7 @@ def analyze_match(resume_text: str, job_description: str) -> dict:
         except json.JSONDecodeError as e:
             raise Exception(f"Failed to parse AI response as JSON: {e}")
     
-    except Exception as e:
+    except Exception:
         raise
 
 def extract_job_details(job_description: str) -> dict:
@@ -106,7 +106,7 @@ def extract_job_details(job_description: str) -> dict:
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel(GEMINI_MODEL)
-    except Exception as e:
+    except Exception:
         raise
     
     # Build extraction prompt
@@ -146,14 +146,14 @@ def extract_job_details(job_description: str) -> dict:
             
             result = json.loads(response_text)
             return result
-        except json.JSONDecodeError as e:
+        except json.JSONDecodeError:
             # If JSON parsing fails, return defaults
             return {
                 "job_title": "Unknown",
                 "company_name": "Unknown"
             }
     
-    except Exception as e:
+    except Exception:
         # If API call fails, return defaults
         return {
             "job_title": "Unknown",

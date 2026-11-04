@@ -1,11 +1,9 @@
 import os
-import logging
 from pathlib import Path
-from typing import Optional, Dict, Any
 import google.generativeai as genai
-from jinja2 import Environment, FileSystemLoader, Template
+from jinja2 import Environment, FileSystemLoader
 
-from config.settings import GEMINI_MODEL, OUTPUT_PATH
+from config.settings import GEMINI_MODEL
 
 PROMPTS_DIR = Path(__file__).parent / "prompts" / "system"
 
@@ -128,5 +126,5 @@ def process_and_tailor_from_gui(resume_text, job_description, output_path, role_
             "cover_letter": cover_letter
         }
         
-    except Exception as e:
+    except Exception:
         raise

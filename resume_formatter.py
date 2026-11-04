@@ -99,7 +99,7 @@ def _split_bold_runs(text):
 def render_pdf(blocks, output_path, candidate_name="", cover_letter_text=""):
     """Render blocks to a styled PDF. Returns the page count."""
     from reportlab.platypus import (
-        SimpleDocTemplate, Paragraph, Spacer, HRFlowable,
+        SimpleDocTemplate, Paragraph, HRFlowable,
     )
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.lib.units import inch
