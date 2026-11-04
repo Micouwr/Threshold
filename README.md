@@ -111,6 +111,7 @@ These icons provide consistent branding across all supported platforms.
   - Word (.docx)
   - Plain Text (.txt)
   - ATS-Optimized (for Applicant Tracking Systems)
+- Resumes are kept to 2 pages. If a PDF export runs over, the app offers to condense it: the AI suggests specific cuts or rewrites (oldest and least relevant first), you check the ones you want, and the revised resume is saved back automatically.
 - Delete tailored documents selectively:
   - Delete only resume and cover letter (job description preserved by default)
   - Option to delete all files including job description
