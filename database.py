@@ -11,6 +11,7 @@ class DatabaseManager:
     
     def init_database(self):
         """Initialize the database with required tables"""
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
         with sqlite3.connect(self.db_path) as conn:
             # Check if applications table exists and has match_score column
             cursor = conn.execute("PRAGMA table_info(applications)")

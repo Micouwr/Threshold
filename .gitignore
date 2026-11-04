@@ -40,9 +40,8 @@ backup/
 # Output files (user-generated)
 output/
 
-# Database (user data - optional)
-# Uncomment if you want to track schema but not data
-# database/applications.db
+# Database (user data - not tracked)
+database/applications.db
 data/
 *.backup
 __pycache__/
