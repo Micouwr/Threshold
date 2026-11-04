@@ -2978,7 +2978,7 @@ COVER LETTER
             "1. Project root: job-application-bot/.env\n"
             "2. Current directory: ./.env\n"
             "3. Home directory: ~/.job_application_bot.env\n\n"
-            "You can get a free API key from: https://makersuite.google.com/app/apikey "
+            "You can get a free API key from: https://aistudio.google.com/apikey "
         )
         self._log_message("API key missing - please configure .env file", "warning")
 
