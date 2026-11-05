@@ -13,7 +13,7 @@ CareerForge AI is a governed resume-tailoring system designed around AI failure 
 Most resume tools say "generate better resumes." CareerForge says the system can refuse to generate. Three rules enforce that:
 
 - **Threshold gate.** Tailoring only runs when the match score meets the configured threshold (default 80%). Below it, tailoring is disabled to prevent poor-quality results. A resume tool that tells you no.
-- **Factual grounding.** The AI uses only information from the source resume. It does not add experience, invent details, or oversell. The prompt instructs the model to re-read the tailored resume and remove anything not supported by the original before outputting.
+- **Factual grounding.** The AI is instructed to use only information from the source resume, and the prompt includes a self-check asking it to remove anything not supported by the original before outputting. It does not add experience, invent details, or oversell.
 - **Output constraints.** Tailored resumes follow a fixed structure (standard sections, single column, no tables) and are kept to 2 pages.
 
 The AI proposes. Rules and humans dispose.
@@ -25,18 +25,18 @@ The AI proposes. Rules and humans dispose.
 CareerForge AI analyzes job descriptions against a source resume, applies governance controls, and produces tailored application materials only when compatibility meets a configurable threshold.
 
 Key Features:
+- Configurable minimum match threshold through GUI settings
 - AI-powered resume compatibility scoring
 - Intelligent resume and cover letter tailoring
-- Job description storage for future reference
-- Professional PDF export capability
-- Role-based customization for different position levels
-- Modern, themed UI with improved visual design
-- Enhanced user experience with better layouts and styling
-- Multiple export formats (PDF, Word, Plain Text, ATS-Optimized)
 - Job import from external sources (LinkedIn, Email, Plain Text)
+- Job description storage for future reference
+- Multiple export formats (PDF, Word, Plain Text, ATS-Optimized)
+- Role-based customization for different position levels
 - Enhanced custom prompt management with template validation
 - Built-in prompt examples and variable preview functionality
-- Configurable minimum match threshold through GUI settings
+- Professional PDF export capability
+- Modern, themed UI with improved visual design
+- Enhanced user experience with better layouts and styling
 
 ---
 
@@ -222,4 +222,5 @@ CareerForge AI is available under two licensing options:
 For commercial licensing inquiries, please contact via https://github.com/Micouwr.
 
 See LICENSE_MPL.md and LICENSE_COMMERCIAL.md for complete license terms.
+
 
