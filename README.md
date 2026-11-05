@@ -22,7 +22,7 @@ The AI proposes. Rules and humans dispose.
 
 ## Overview
 
-CareerForge AI tailors your resume for specific job applications using Google's Gemini AI (Gemini 3.8 Flash). It analyzes the job description and your resume to create customized versions that align with the position requirements.
+CareerForge AI analyzes job descriptions against a source resume, applies governance controls, and produces tailored application materials only when compatibility meets a configurable threshold.
 
 Key Features:
 - AI-powered resume compatibility scoring
@@ -222,3 +222,4 @@ CareerForge AI is available under two licensing options:
 For commercial licensing inquiries, please contact via https://github.com/Micouwr.
 
 See LICENSE_MPL.md and LICENSE_COMMERCIAL.md for complete license terms.
+
