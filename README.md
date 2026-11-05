@@ -2,7 +2,7 @@
 
 A governed resume-tailoring system that refuses to produce low-confidence output.
 
-[Python: 3.9+] [License: Dual MPL-2.0/Commercial]
+[License: Dual MPL-2.0/Commercial]
 
 ---
 
@@ -14,7 +14,7 @@ Most resume tools say "generate better resumes." CareerForge says the system can
 
 - **Threshold gate.** Tailoring only runs when the match score meets the configured threshold (default 80%). Below it, tailoring is disabled to prevent poor-quality results. A resume tool that tells you no.
 - **Factual grounding.** The AI is instructed to use only information from the source resume, and the prompt includes a self-check asking it to remove anything not supported by the original before outputting. It does not add experience, invent details, or oversell.
-- **Output constraints.** Tailored resumes follow a fixed structure (standard sections, single column, no tables) and are kept to 2 pages.
+- **Output constraints.** Tailored resumes follow a fixed structure (standard sections, single column, no tables) and are designed to fit 2 pages.
 
 The AI proposes. Rules and humans dispose.
 
@@ -45,11 +45,6 @@ Key Features:
 ### Step 1: Install Dependencies
 ```bash
 pip install -r requirements.txt
-```
-
-For PDF export functionality:
-```bash
-pip install reportlab
 ```
 
 ### Step 2: Configure API Key
@@ -113,7 +108,7 @@ Visual representation of the CareerForge AI workflow from job analysis to tailor
   - Word (.docx)
   - Plain Text (.txt)
   - ATS-Optimized (for Applicant Tracking Systems)
-- Resumes are kept to 2 pages. If a PDF export runs over, the app offers to condense it: the AI suggests specific cuts or rewrites (oldest and least relevant first), you check the ones you want, and the revised resume is saved back automatically.
+- Resumes are designed to fit 2 pages. If a PDF export runs over, the app offers to condense it: the AI suggests specific cuts or rewrites (oldest and least relevant first), you check the ones you want, and the revised resume is saved back automatically.
 - Delete tailored documents selectively:
   - Delete only resume and cover letter (job description preserved by default)
   - Option to delete all files including job description

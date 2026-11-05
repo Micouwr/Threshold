@@ -46,7 +46,7 @@ def test_ai_integration():
         job_title="Full Stack Developer", company_name="Test Corp",
     )
     assert result and result.get("resume_text"), "Empty tailoring result"
-    assert len(result["resume_text"]) > 100, f"Tailored resume too short"
+    assert len(result["resume_text"]) > 100, "Tailored resume too short"
     print(f"   Tailored resume length: {len(result['resume_text'])} chars")
     print(f"   Cover letter length: {len(result['cover_letter'])} chars")
 
@@ -58,6 +58,6 @@ if __name__ == "__main__":
         test_ai_integration()
         sys.exit(0)
     except Exception as e:
-        print(f"\n=== TEST FAILED ===")
+        print("\n=== TEST FAILED ===")
         print(f"Error: {e}")
         sys.exit(1)

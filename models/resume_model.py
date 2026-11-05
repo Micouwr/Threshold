@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import List, Dict, Any
 import sqlite3
 from config.settings import DB_PATH

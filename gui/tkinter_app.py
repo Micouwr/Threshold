@@ -31,7 +31,6 @@ logging.basicConfig(
 
 class JobAppTkinter:
     def __init__(self, master=None):
-        print("MAIN FILE EXECUTED - UNIQUE IDENTIFIER")
         
         # Apply themed style
         self.style = ttkthemes.ThemedStyle(master)

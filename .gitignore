@@ -44,9 +44,3 @@ output/
 database/applications.db
 data/
 *.backup
-__pycache__/
-*.pyc
-.env
-dist/
-build/
-.env

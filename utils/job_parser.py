@@ -7,7 +7,7 @@ Support for parsing job descriptions from various sources:
 """
 
 import re
-from typing import Dict, Optional
+from typing import Dict
 import json
 
 
