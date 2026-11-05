@@ -1,14 +1,28 @@
 # CareerForge AI
 
-Intelligent Resume Tailoring for IT/DevOps/AI Governance Roles
+A governed resume-tailoring system that refuses to produce low-confidence output.
 
 [Python: 3.9+] [License: Dual MPL-2.0/Commercial]
 
 ---
 
+## Why governed?
+
+CareerForge AI is a governed resume-tailoring system designed around AI failure modes. Tailoring only occurs when job compatibility meets a configurable threshold, and all generated content must remain grounded in the source resume.
+
+Most resume tools say "generate better resumes." CareerForge says the system can refuse to generate. Three rules enforce that:
+
+- **Threshold gate.** Tailoring only runs when the match score meets the configured threshold (default 80%). Below it, tailoring is disabled to prevent poor-quality results. A resume tool that tells you no.
+- **Factual grounding.** The AI uses only information from the source resume. It does not add experience, invent details, or oversell. The prompt instructs the model to re-read the tailored resume and remove anything not supported by the original before outputting.
+- **Output constraints.** Tailored resumes follow a fixed structure (standard sections, single column, no tables) and are kept to 2 pages.
+
+The AI proposes. Rules and humans dispose.
+
+---
+
 ## Overview
 
-CareerForge AI is an intelligent tool that helps you tailor your resume for specific job applications using Google's Gemini AI (Gemini 3.8 Flash). By analyzing the job description and your resume, it creates customized versions that align with the position requirements while preserving all factual information from your original resume.
+CareerForge AI tailors your resume for specific job applications using Google's Gemini AI (Gemini 3.8 Flash). It analyzes the job description and your resume to create customized versions that align with the position requirements.
 
 Key Features:
 - AI-powered resume compatibility scoring
