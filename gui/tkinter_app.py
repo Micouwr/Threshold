@@ -93,14 +93,14 @@ class JobAppTkinter:
             icon_path = Path(__file__).parent.parent / "assets"
             
             # Try PNG format first for cross-platform compatibility (macOS prefers this)
-            png_path = icon_path / "CareerForge_AI.png"
+            png_path = icon_path / "Threshold.png"
             if png_path.exists() and png_path.stat().st_size > 0:  # Check if file is not empty
                 icon_image = tk.PhotoImage(file=str(png_path))
                 self.master.iconphoto(True, icon_image)
                 return
             
             # Try Threshold ICO format (Windows)
-            threshold_ico = icon_path / "CareerForge_AI.ico"
+            threshold_ico = icon_path / "Threshold.ico"
             if threshold_ico.exists():
                 self.master.iconbitmap(str(threshold_ico))
                 return

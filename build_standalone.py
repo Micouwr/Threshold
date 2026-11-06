@@ -43,9 +43,9 @@ def build_executable():
 
     # App icon, per platform (PyInstaller takes .icns on macOS, .ico on Windows)
     if system == "Darwin":
-        icon_file = ROOT_DIR / "assets" / "CareerForge_AI.icns"
+        icon_file = ROOT_DIR / "assets" / "Threshold.icns"
     elif system == "Windows":
-        icon_file = ROOT_DIR / "assets" / "CareerForge_AI.ico"
+        icon_file = ROOT_DIR / "assets" / "Threshold.ico"
     else:
         icon_file = None
     if icon_file is not None:
@@ -99,10 +99,10 @@ def build_executable():
 
     # Verify icon files
     icon_dir = ROOT_DIR / "assets"
-    ico = icon_dir / "CareerForge_AI.ico"
+    ico = icon_dir / "Threshold.ico"
     if ico.exists():
         print(f"    - Windows icon: {ico} ({ico.stat().st_size:,} bytes)")
-    icns = icon_dir / "CareerForge_AI.icns"
+    icns = icon_dir / "Threshold.icns"
     if icns.exists():
         print(f"    - macOS icon: {icns} ({icns.stat().st_size:,} bytes)")
 

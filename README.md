@@ -66,7 +66,7 @@ python gui/tkinter_app.py
 
 The Threshold application icon.
 
-![Threshold logo](assets/CareerForge_AI.png)
+![Threshold logo](assets/Threshold.png)
 
 ### Workflow Diagram
 
