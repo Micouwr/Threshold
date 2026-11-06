@@ -327,8 +327,8 @@ Available upon request. Portfolio of designed solutions and architectural diagra
         self.analyze_button = ttk.Button(button_frame, text="Analyze Match", command=self.analyze_match)
         self.analyze_button.grid(row=0, column=0, padx=5)
         
-        # Start Tailoring button (second)
-        self.start_button = ttk.Button(button_frame, text="Start Tailoring", command=self.start_tailoring)
+        # Start Tailoring button (second, disabled until a match analysis passes the threshold)
+        self.start_button = ttk.Button(button_frame, text="Start Tailoring", command=self.start_tailoring, state="disabled")
         self.start_button.grid(row=0, column=1, padx=5)
         
         # Clear Fields button (third)

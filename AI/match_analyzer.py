@@ -13,24 +13,18 @@ try:
 except ImportError:
     GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
 
-DIAGNOSTIC_MODE = False
 
 def analyze_match(resume_text: str, job_description: str) -> dict:
     """Core AI function: Compare resume to job description and return match analysis."""
-    # Diagnostic mode disabled for production
-    
     # Verify API key
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key or api_key == "your_api_key_here":
         raise Exception("GEMINI_API_KEY not configured")
-    
+
     # Configure Gemini
-    try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(GEMINI_MODEL)
-    except Exception:
-        raise
-    
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel(GEMINI_MODEL)
+
     # Build analysis prompt
     prompt = f"""
     Analyze this resume against the job description and provide a match analysis.
@@ -68,32 +62,29 @@ def analyze_match(resume_text: str, job_description: str) -> dict:
     JOB DESCRIPTION:
     {job_description}
     """
-    
-    # Call Gemini API
+
+    # Call Gemini API with a fixed low temperature so scoring is deterministic
+    response = model.generate_content(prompt, generation_config=genai.GenerationConfig(temperature=0.1))
+
+    # Parse JSON response (strip markdown if present)
     try:
-        response = model.generate_content(prompt)
-        
-        # Parse JSON response (strip markdown if present)
-        try:
-            response_text = response.text.strip()
-            
-            # Remove markdown code block markers
-            if response_text.startswith("```json"):
-                response_text = response_text[7:]  # Remove ```json
-            if response_text.startswith("```"):
-                response_text = response_text[3:]  # Remove ```
-            if response_text.endswith("```"):
-                response_text = response_text[:-3]  # Remove ```
-            
-            response_text = response_text.strip()
-            
-            result = json.loads(response_text)
-            return result
-        except json.JSONDecodeError as e:
-            raise Exception(f"Failed to parse AI response as JSON: {e}")
-    
-    except Exception:
-        raise
+        response_text = response.text.strip()
+
+        # Remove markdown code block markers
+        if response_text.startswith("```json"):
+            response_text = response_text[7:]  # Remove ```json
+        if response_text.startswith("```"):
+            response_text = response_text[3:]  # Remove ```
+        if response_text.endswith("```"):
+            response_text = response_text[:-3]  # Remove ```
+
+        response_text = response_text.strip()
+
+        result = json.loads(response_text)
+        return result
+    except json.JSONDecodeError as e:
+        raise Exception(f"Failed to parse AI response as JSON: {e}")
+
 
 def extract_job_details(job_description: str) -> dict:
     """Extract job title and company name from job description using AI."""
@@ -101,39 +92,36 @@ def extract_job_details(job_description: str) -> dict:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key or api_key == "your_api_key_here":
         raise Exception("GEMINI_API_KEY not configured")
-    
+
     # Configure Gemini
-    try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(GEMINI_MODEL)
-    except Exception:
-        raise
-    
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel(GEMINI_MODEL)
+
     # Build extraction prompt
     prompt = f"""
     Extract the job title and company name from this job description.
     Return ONLY a valid JSON object with these exact keys: job_title, company_name
-    
+
     If you cannot determine either value, use "Unknown" as the value.
-    
+
     Example format:
     {{
         "job_title": "Software Engineer",
         "company_name": "Tech Corp"
     }}
-    
+
     JOB DESCRIPTION:
     {job_description}
     """
-    
+
     # Call Gemini API
     try:
         response = model.generate_content(prompt)
-        
+
         # Parse JSON response (strip markdown if present)
         try:
             response_text = response.text.strip()
-            
+
             # Remove markdown code block markers
             if response_text.startswith("```json"):
                 response_text = response_text[7:]  # Remove ```json
@@ -141,9 +129,9 @@ def extract_job_details(job_description: str) -> dict:
                 response_text = response_text[3:]  # Remove ```
             if response_text.endswith("```"):
                 response_text = response_text[:-3]  # Remove ```
-            
+
             response_text = response_text.strip()
-            
+
             result = json.loads(response_text)
             return result
         except json.JSONDecodeError:
@@ -152,7 +140,7 @@ def extract_job_details(job_description: str) -> dict:
                 "job_title": "Unknown",
                 "company_name": "Unknown"
             }
-    
+
     except Exception:
         # If API call fails, return defaults
         return {
@@ -160,61 +148,44 @@ def extract_job_details(job_description: str) -> dict:
             "company_name": "Unknown"
         }
 
+
 # Self-test when module is run directly
 if __name__ == "__main__":
-    if DIAGNOSTIC_MODE:
-        print("[DIAGNOSTIC] Running self-test...")
-    
     # Built-in test data (no separate files)
     test_resume = """
     John Doe
     AI Developer & Automation Specialist
     Louisville, KY
-    
+
     Professional Summary:
     5 years experience building AI-powered applications using Python, GPT APIs, and PyInstaller.
-    
+
     Technical Skills:
     Python, JavaScript, SQL, Google Generative AI, PyInstaller, SQLite, REST APIs
-    
+
     Experience:
     Senior AI Developer at Tech Innovations Inc. (2022-Present)
     - Developed AI-powered resume tailoring system using GPT-4 API
     - Implemented cross-platform desktop applications for 500+ users
     - Built automated job application bot using Gemini API
-    
+
     Certifications:
     - Two AI certifications (Google, AWS)
     """
-    
+
     test_job = """
     AI Learning Design Lead
     Healthcare Company
-    
+
     Responsibilities:
     Design, develop, and deliver strategic learning experiences supporting AI initiatives.
     Analyze content, write storyboards, partner with subject matter experts.
-    
+
     Requirements:
     - 5+ years experience in AI/ML development
     - Python, JavaScript, SQL proficiency
     - Experience with GPT APIs and PyInstaller
     - Strong consultative and project management skills
     """
-    
-    try:
-        if DIAGNOSTIC_MODE:
-            print("[DIAGNOSTIC] Testing AI match analysis...")
-        result = analyze_match(test_resume, test_job)
 
-        if DIAGNOSTIC_MODE:
-            print("\n[DIAGNOSTIC] Test completed successfully!")
-            print(f"Overall Match Score: {result.get('overall_score', 'N/A')}%")
-            print(f"Verdict: {result.get('verdict', 'N/A')}")
-            print(f"\nEvidence: {result.get('evidence', [])}")
-            print(f"Gaps: {result.get('gaps', [])}")
-        
-    except Exception as e:
-        if DIAGNOSTIC_MODE:
-            print(f"\n[DIAGNOSTIC] Test FAILED: {e}")
-        raise
+    analyze_match(test_resume, test_job)

@@ -25,7 +25,7 @@ the vault-backed helper with the same model and the same resume summary and
 job description below. The response parsing is the same as the function's:
 strip markdown fences, then `json.loads`. The only untested part of the
 function is its own import and key-loading path, which is unchanged code
-that previously ran in production use.
+that previously ran locally.
 
 ## What was tested
 
