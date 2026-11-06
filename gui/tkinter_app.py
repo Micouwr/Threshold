@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog, scrolledtext
 import ttkthemes
@@ -60,6 +64,9 @@ class JobAppTkinter:
         
         # Initialize match analysis variables
         self.match_data = None
+        # Inputs the stored match was computed from; used to spot a stale score
+        self._match_job_description = None
+        self._match_resume_text = None
         
         # Initialize processing state
         self._processing = False
@@ -221,6 +228,9 @@ Available upon request. Portfolio of designed solutions and architectural diagra
         self._create_settings_tab()  # Settings/Preferences
         self._create_output_tab()  # OUTPUT & LOGS moved to final position
         
+        # Refresh the Custom Prompt list when the user switches tabs
+        self.notebook.bind("<<NotebookTabChanged>>", self._on_tab_changed)
+        
         # Make notebook expandable
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(0, weight=1)
@@ -277,9 +287,8 @@ Available upon request. Portfolio of designed solutions and architectural diagra
         role_tooltip += "* Higher role levels require demonstrated leadership experience\n\n"
         role_tooltip += "RELATIONSHIP TO CUSTOM PROMPTS:\n"
         role_tooltip += "* Role level determines base template used for tailoring\n"
-        role_tooltip += "* Custom prompts are applied IN ADDITION to role level adjustments\n"
-        role_tooltip += "* Custom prompts can override or enhance role-level behavior\n"
-        role_tooltip += "* Both work together: Role level + Custom prompt = Final output\n\n"
+        role_tooltip += "* A selected custom prompt replaces the role-level template for this run\n"
+        role_tooltip += "* Leave Custom Prompt on None to use the role-level template\n\n"
         role_tooltip += "BEST PRACTICES:\n"
         role_tooltip += "* Use role level for general experience level matching\n"
         role_tooltip += "* Use custom prompts for specific company/role requirements\n"
@@ -298,17 +307,29 @@ Available upon request. Portfolio of designed solutions and architectural diagra
                              font=('Arial', 9), foreground='blue')
         role_help.grid(row=4, column=1, columnspan=2, sticky=tk.W, pady=(0, 10))
         
-        ttk.Label(tab, text="Job Description:", style='Bold.TLabel').grid(row=5, column=0, sticky=tk.W, pady=5)
-        self.job_desc_text = scrolledtext.ScrolledText(tab, width=80, height=15, wrap=tk.WORD, font=('Arial', 10))
-        self.job_desc_text.grid(row=5, column=1, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5)
+        # Custom Prompt Selection (templates saved in prompts/user/)
+        ttk.Label(tab, text="Custom Prompt:", style='Bold.TLabel').grid(row=5, column=0, sticky=tk.W, pady=5)
+        self.custom_prompt_var = tk.StringVar(value="None (use role template)")
+        self.custom_prompt_combo = ttk.Combobox(tab, textvariable=self.custom_prompt_var,
+                                values=self._list_custom_prompts(),
+                                state='readonly', font=('Arial', 10), width=47)
+        self.custom_prompt_combo.grid(row=5, column=1, columnspan=2, sticky=(tk.W, tk.E), pady=5)
         
-        ttk.Label(tab, text="Job URL:", style='Bold.TLabel').grid(row=6, column=0, sticky=tk.W, pady=5)
+        ttk.Label(tab, text="Job Description:", style='Bold.TLabel').grid(row=6, column=0, sticky=tk.W, pady=5)
+        self.job_desc_text = scrolledtext.ScrolledText(tab, width=80, height=15, wrap=tk.WORD, font=('Arial', 10))
+        self.job_desc_text.grid(row=6, column=1, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5)
+        
+        # A match result only describes the job description it was computed from
+        self.job_desc_text.bind("<KeyRelease>", lambda e: self._invalidate_match())
+        self.job_desc_text.bind("<<Paste>>", lambda e: self._invalidate_match())
+        
+        ttk.Label(tab, text="Job URL:", style='Bold.TLabel').grid(row=7, column=0, sticky=tk.W, pady=5)
         self.job_url_entry = ttk.Entry(tab, width=50, font=('Arial', 10))
-        self.job_url_entry.grid(row=6, column=1, columnspan=2, sticky=(tk.W, tk.E), pady=5)
+        self.job_url_entry.grid(row=7, column=1, columnspan=2, sticky=(tk.W, tk.E), pady=5)
         
         # Status section
         status_frame = ttk.LabelFrame(tab, text="Status", padding="10")
-        status_frame.grid(row=7, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=10)
+        status_frame.grid(row=8, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=10)
         status_frame.columnconfigure(0, weight=1)
         
         # Status label for match analysis feedback
@@ -321,7 +342,7 @@ Available upon request. Portfolio of designed solutions and architectural diagra
         
         # Buttons - Reordered as requested
         button_frame = ttk.Frame(tab)
-        button_frame.grid(row=8, column=0, columnspan=4, pady=15)
+        button_frame.grid(row=9, column=0, columnspan=4, pady=15)
         
         # Add Analyze Match button (first)
         self.analyze_button = ttk.Button(button_frame, text="Analyze Match", command=self.analyze_match)
@@ -341,7 +362,7 @@ Available upon request. Portfolio of designed solutions and architectural diagra
         
         # Configure grid weights
         tab.columnconfigure(1, weight=1)
-        tab.rowconfigure(5, weight=1)
+        tab.rowconfigure(6, weight=1)
     
     def _create_resume_mgmt_tab(self):
         """Create the Resume Management tab"""
@@ -600,6 +621,7 @@ BEST PRACTICES:
             self.current_threshold = new_threshold
             self.threshold_slider.set(new_threshold)
             self.threshold_value_label.config(text=f"{new_threshold}%")
+            self._invalidate_match()
             
             messagebox.showinfo("Success", f"Minimum match threshold updated to {new_threshold}%\n\nRemember: Lower thresholds (70-75%) = More opportunities\nHigher thresholds (85-90%) = Better-targeted applications")
             self._log_message(f"Minimum match threshold updated to {new_threshold}%", "info")
@@ -615,6 +637,7 @@ BEST PRACTICES:
         self.threshold_entry.delete(0, tk.END)
         self.threshold_entry.insert(0, str(default_threshold))
         self.threshold_value_label.config(text=f"{default_threshold}%")
+        self._invalidate_match()
         
         messagebox.showinfo("Success", f"Minimum match threshold reset to default ({default_threshold}%)")
         self._log_message(f"Minimum match threshold reset to default ({default_threshold}%)", "info")
@@ -645,6 +668,8 @@ BEST PRACTICES:
         """Handle resume selection in treeview"""
         selection = self.resume_tree.selection()
         if selection:
+            # A different resume means the stored match no longer applies
+            self._invalidate_match()
             item = self.resume_tree.item(selection[0])
             resume_path = item['values'][1]
             
@@ -864,9 +889,9 @@ BEST PRACTICES:
             # Handle PDF files
             if file_path.lower().endswith('.pdf'):
                 try:
-                    import PyPDF2
+                    import pypdf
                     with open(file_path, 'rb') as pdf_file:
-                        pdf_reader = PyPDF2.PdfReader(pdf_file)
+                        pdf_reader = pypdf.PdfReader(pdf_file)
                         text_content = ""
                         for page in pdf_reader.pages:
                             text_content += page.extract_text() + "\n"
@@ -1435,6 +1460,58 @@ BEST PRACTICES:
         if active_resume:
             self.active_resume_id = active_resume['id']
     
+    def _invalidate_match(self):
+        """Clear a match result that no longer describes the current inputs."""
+        self.match_data = None
+        self._match_job_description = None
+        self._match_resume_text = None
+        if hasattr(self, 'start_button') and self.start_button:
+            self.start_button.config(state='disabled')
+        if hasattr(self, 'match_label') and self.match_label:
+            self.match_label.config(text="Match Score: Not analyzed", foreground="blue")
+
+    def _match_is_current(self):
+        """True only if the stored match still describes the current inputs."""
+        if not self.match_data:
+            return False
+        if self.match_data.get('overall_score', 0) < self.current_threshold:
+            return False
+        if self._match_job_description is None or self._match_resume_text is None:
+            return False
+        if self.job_desc_text.get('1.0', tk.END).strip() != self._match_job_description:
+            return False
+        if self._load_selected_resume() != self._match_resume_text:
+            return False
+        return True
+
+    def _list_custom_prompts(self):
+        """List saved custom prompt templates, with the default choice first."""
+        choices = ["None (use role template)"]
+        prompts_dir = Path("prompts/user")
+        if prompts_dir.exists():
+            choices.extend(sorted(f.name for f in prompts_dir.glob("*.txt.j2")))
+        return choices
+
+    def _refresh_custom_prompt_choices(self):
+        """Refresh the Custom Prompt dropdown from prompts/user/."""
+        if not hasattr(self, 'custom_prompt_combo') or not self.custom_prompt_combo:
+            return
+        current = self.custom_prompt_var.get()
+        choices = self._list_custom_prompts()
+        self.custom_prompt_combo['values'] = choices
+        if current not in choices:
+            self.custom_prompt_var.set(choices[0])
+
+    def _on_tab_changed(self, event):
+        """Refresh the Custom Prompt list when the Job Management tab is shown."""
+        try:
+            selected = event.widget.select()
+            tab_text = event.widget.tab(selected, "text")
+        except Exception:
+            return
+        if tab_text == "Job Management":
+            self._refresh_custom_prompt_choices()
+
     def analyze_match(self):
         """Analyze resume-job compatibility and display match score"""
         self._log_message("Starting match analysis...", "info")
@@ -1465,6 +1542,8 @@ BEST PRACTICES:
             self.master.update_idletasks()
             
             self.match_data = analyze_match(resume_text, job_description)
+            self._match_job_description = job_description
+            self._match_resume_text = resume_text
             score = self.match_data.get('overall_score', 0)
             verdict = self.match_data.get('verdict', '')
 
@@ -1497,6 +1576,7 @@ BEST PRACTICES:
             self.status_label.config(text="Ready")
             
         except Exception as e:
+            self._invalidate_match()
             self._log_message(f"Match analysis error: {e}", "error")
             messagebox.showerror("Error", f"Match analysis failed: {e}")
             self.status_label.config(text="Ready")
@@ -1621,10 +1701,14 @@ GAPS:
         # Get role level
         role_level = self.role_var.get()
         
+        # Get selected custom prompt, if any
+        selected_prompt = self.custom_prompt_var.get()
+        custom_prompt = None if selected_prompt == "None (use role template)" else selected_prompt
+        
         # Start tailoring thread with AI engine
         thread = threading.Thread(
             target=self.tailor_application_thread,
-            args=(job_title, company, job_description, self.job_url_entry.get(), resume_text, role_level, None)
+            args=(job_title, company, job_description, self.job_url_entry.get(), resume_text, role_level, custom_prompt)
         )
         thread.daemon = True
         thread.start()
@@ -1634,7 +1718,7 @@ GAPS:
         try:
             # Process and tailor
             result = process_and_tailor_from_gui(
-                resume_text, job_description, OUTPUT_PATH,
+                resume_text, job_description,
                 role_level, custom_prompt, job_title, company
             )
             
@@ -1823,6 +1907,9 @@ GAPS:
             self.job_desc_text.delete('1.0', tk.END)
             self.job_desc_text.insert('1.0', job_data.get('description', content))
             
+            # Imported text is new input, so any stored match is stale
+            self._invalidate_match()
+            
             # Show success message
             messagebox.showinfo("Import Successful", 
                               f"Job imported successfully!\n\nTitle: {job_data.get('title', 'N/A')}\nCompany: {job_data.get('company', 'N/A')}")
@@ -1894,7 +1981,7 @@ GAPS:
         try:
             with open("prompts/user/custom_template.txt.j2", "r") as f:
                 self.prompt_text.insert("1.0", f.read())
-        except:
+        except FileNotFoundError:
             default_template = """# Custom Resume Tailoring Prompt Template
 # Available variables: {{ role_level }}, {{ company_name }}, {{ job_title }}, {{ job_description }}, {{ resume_text }}
 
@@ -2799,6 +2886,7 @@ COVER LETTER
         self.company_entry.delete(0, tk.END)
         self.job_desc_text.delete('1.0', tk.END)
         self.job_url_entry.delete(0, tk.END)
+        self._invalidate_match()
     
     def quit_application(self):
         """Quit the application with proper cleanup"""
@@ -2831,7 +2919,12 @@ COVER LETTER
         self.company_entry.config(state=state)
         self.job_desc_text.config(state=state)
         self.job_url_entry.config(state=state)
-        self.start_button.config(state=state)
+        # Start Tailoring is only usable while a passing match is current
+        if enabled:
+            start_state = 'normal' if self._match_is_current() else 'disabled'
+        else:
+            start_state = 'disabled'
+        self.start_button.config(state=start_state)
         self.clear_button.config(state=state)
         self.upload_button.config(state=state)
         self.delete_button.config(state=state)

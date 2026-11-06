@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 """
 Integration test: Verify AI modules work when imported by GUI.
 Uses the live tailoring path (tailor.py) that the GUI actually calls.
@@ -42,7 +46,7 @@ def test_ai_integration():
     # Test tailoring through the same function the GUI calls
     print("\n2. Testing resume tailoring...")
     result = process_and_tailor_from_gui(
-        resume, job, PROJECT_ROOT / "output", "Standard", None,
+        resume, job, "Standard", None,
         job_title="Full Stack Developer", company_name="Test Corp",
     )
     assert result and result.get("resume_text"), "Empty tailoring result"
