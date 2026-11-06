@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 """AI-assisted resume condensing.
 
 When a tailored resume runs over 2 pages, the AI analyzes it and proposes
@@ -10,6 +14,7 @@ import os
 import json
 from pathlib import Path
 from dotenv import load_dotenv
+import google.generativeai as genai
 
 load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
@@ -20,7 +25,6 @@ except ImportError:
 
 
 def _get_model():
-    import google.generativeai as genai
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key or api_key == "your_api_key_here":
         raise Exception("GEMINI_API_KEY not configured")
@@ -94,7 +98,8 @@ def suggest_condense_options(resume_text):
     RESUME:
     {resume_text}
     """
-    response = model.generate_content(prompt)
+    # Fixed low temperature so the proposed options are deterministic
+    response = model.generate_content(prompt, generation_config=genai.GenerationConfig(temperature=0.1))
     result = _parse_json_response(response.text)
     return result.get("options", [])
 
@@ -119,5 +124,6 @@ def apply_condense_options(resume_text, selected_options):
 
     Return ONLY the revised resume text, no explanations.
     """
-    response = model.generate_content(prompt)
+    # Fixed low temperature so the revised resume is deterministic
+    response = model.generate_content(prompt, generation_config=genai.GenerationConfig(temperature=0.1))
     return response.text.strip()

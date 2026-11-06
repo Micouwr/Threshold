@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 import os
 import google.generativeai as genai
 import json
@@ -114,9 +118,9 @@ def extract_job_details(job_description: str) -> dict:
     {job_description}
     """
 
-    # Call Gemini API
+    # Call Gemini API with a fixed low temperature so extraction is deterministic
     try:
-        response = model.generate_content(prompt)
+        response = model.generate_content(prompt, generation_config=genai.GenerationConfig(temperature=0.1))
 
         # Parse JSON response (strip markdown if present)
         try:
