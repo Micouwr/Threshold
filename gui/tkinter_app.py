@@ -41,7 +41,7 @@ class JobAppTkinter:
         self.style.set_theme("arc")  # Modern, clean theme
         
         self.master = master
-        self.master.title("CareerForge AI - Intelligent Resume Tailoring Tool")
+        self.master.title("Threshold - Intelligent Resume Tailoring Tool")
         self.master.geometry("1050x750")
         
         # Set window icon if available
@@ -99,10 +99,10 @@ class JobAppTkinter:
                 self.master.iconphoto(True, icon_image)
                 return
             
-            # Try new CareerForge AI ICO format (Windows)
-            careerforge_ico = icon_path / "CareerForge_AI.ico"
-            if careerforge_ico.exists():
-                self.master.iconbitmap(str(careerforge_ico))
+            # Try Threshold ICO format (Windows)
+            threshold_ico = icon_path / "CareerForge_AI.ico"
+            if threshold_ico.exists():
+                self.master.iconbitmap(str(threshold_ico))
                 return
             
             # Try legacy ICO format (Windows)
@@ -167,7 +167,7 @@ University of California, Berkeley | 2019
 Relevant Coursework: Machine Learning, AI Systems, Data Structures, Algorithms
 
 KEY PROJECTS
-CareerForge AI - AI Resume Tailorer
+Threshold - AI Resume Tailorer
 - Designed intelligent resume tailoring system using GPT-4 API
 - Architected cross-platform solution for Windows, macOS, and Linux
 - Orchestrated development process with technical team
@@ -3016,7 +3016,7 @@ COVER LETTER
         possible_paths = [
             Path(__file__).parent.parent / ".env",  # Development path
             Path.cwd() / ".env",                    # Current working directory
-            Path.home() / ".job_application_bot.env",  # User home directory
+            Path.home() / ".threshold.env",  # User home directory
         ]
         
         api_key = None
@@ -3032,9 +3032,9 @@ COVER LETTER
         messagebox.showwarning(
             "API Key Missing",
             "Gemini API key not found. Please set GEMINI_API_KEY in one of these locations:\n\n"
-            "1. Project root: job-application-bot/.env\n"
+            "1. Project root: threshold/.env\n"
             "2. Current directory: ./.env\n"
-            "3. Home directory: ~/.job_application_bot.env\n\n"
+            "3. Home directory: ~/.threshold.env\n\n"
             "You can get a free API key from: https://aistudio.google.com/apikey "
         )
         self._log_message("API key missing - please configure .env file", "warning")

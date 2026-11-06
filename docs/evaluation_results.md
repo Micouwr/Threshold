@@ -90,7 +90,7 @@ claimed (the posting lists it only as preferred), no degree was claimed, and
 no management headcount was invented. The empty gaps list is correct for
 this sample: every stated requirement is covered by a stated fact.
 
-**The threshold gate passed.** CareerForge's default match threshold is 80
+**The threshold gate passed.** Threshold's default match threshold is 80
 (configurable 50 to 95). A score of 95 clears it, so this pairing would
 proceed to tailoring.
 

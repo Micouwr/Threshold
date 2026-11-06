@@ -3,7 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 """
-Build script for CareerForge AI - Creates standalone executable with PyInstaller
+Build script for Threshold - Creates standalone executable with PyInstaller
 """
 
 import os
@@ -21,7 +21,7 @@ def build_executable():
     pyinstaller_cmd = [
         sys.executable, "-m", "PyInstaller",
         str(MAIN_SCRIPT),
-        "--name", "CareerForgeAI",
+        "--name", "Threshold",
         "--onedir",
         "--windowed",
         "--clean",
@@ -125,11 +125,11 @@ def build_executable():
         print("  CRITICAL: Users must place their own '.env' file containing API keys")
         print("            in the same directory as the executable.")
         if system == "Darwin":
-            print(" App bundle: ./dist/CareerForgeAI.app")
+            print(" App bundle: ./dist/Threshold.app")
         elif system == "Windows":
-            print(" Executable: ./dist/CareerForgeAI/CareerForgeAI.exe")
+            print(" Executable: ./dist/Threshold/Threshold.exe")
         else:
-            print(" Executable: ./dist/CareerForgeAI/CareerForgeAI")
+            print(" Executable: ./dist/Threshold/Threshold")
 
         return True
 

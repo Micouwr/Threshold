@@ -1,12 +1,12 @@
-CareerForge AI Commercial License
+Threshold Commercial License
 =================================
 
 ## Commercial License Terms
 
-This Commercial License Agreement ("Agreement") is entered into between the licensee ("You") and the copyright holder ("We" or "Us") for the CareerForge AI software.
+This Commercial License Agreement ("Agreement") is entered into between the licensee ("You") and the copyright holder ("We" or "Us") for the Threshold software.
 
 ### 1. Grant of License
-Subject to the terms and conditions of this Agreement, We grant You a non-exclusive, non-transferable license to use the CareerForge AI software for commercial purposes within your organization.
+Subject to the terms and conditions of this Agreement, We grant You a non-exclusive, non-transferable license to use the Threshold software for commercial purposes within your organization.
 
 ### 2. Commercial Rights
 - Use the software for internal business operations
@@ -32,7 +32,7 @@ Subject to the terms and conditions of this Agreement, We grant You a non-exclus
 - Upon termination, you must cease use and destroy all copies
 
 ### 6. Fees
-Commercial licensing fees are available upon request. Open an issue at https://github.com/Micouwr/job-application-bot for pricing information.
+Commercial licensing fees are available upon request. Open an issue at https://github.com/Micouwr/threshold for pricing information.
 
 ### 7. Warranty Disclaimer
 The software is provided "as is" without warranty of any kind. We disclaim all warranties, express or implied.
@@ -44,7 +44,7 @@ In no event shall we be liable for any damages arising from the use of this soft
 This Agreement shall be governed by the laws of [Your State/Country], without regard to conflict of law principles.
 
 ### 10. Contact
-For licensing inquiries, open an issue at https://github.com/Micouwr/job-application-bot
+For licensing inquiries, open an issue at https://github.com/Micouwr/threshold
 
 ---
 

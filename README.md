@@ -1,4 +1,4 @@
-# CareerForge AI
+# Threshold
 
 A governed resume-tailoring system that refuses to produce low-confidence output.
 
@@ -8,9 +8,9 @@ A governed resume-tailoring system that refuses to produce low-confidence output
 
 ## Why governed?
 
-CareerForge AI is a governed resume-tailoring system designed around AI failure modes. Tailoring only occurs when job compatibility meets a configurable threshold, and all generated content must remain grounded in the source resume.
+Threshold is a governed resume-tailoring system designed around AI failure modes. Tailoring only occurs when job compatibility meets a configurable threshold, and all generated content must remain grounded in the source resume.
 
-Most resume tools say "generate better resumes." CareerForge says the system can refuse to generate. Three rules enforce that:
+Most resume tools say "generate better resumes." Threshold says the system can refuse to generate. Three rules enforce that:
 
 - **Threshold gate.** Tailoring only runs when the match score meets the configured threshold (default 80%). Below it, tailoring is disabled to prevent poor-quality results. A resume tool that tells you no.
 - **Factual grounding.** The AI is instructed to use only information from the source resume, and the prompt includes a self-check asking it to remove anything not supported by the original before outputting. It does not add experience, invent details, or oversell.
@@ -22,7 +22,7 @@ The AI proposes. Rules and humans dispose.
 
 ## Overview
 
-CareerForge AI analyzes job descriptions against a source resume, applies governance controls, and produces tailored application materials only when compatibility meets a configurable threshold.
+Threshold analyzes job descriptions against a source resume, applies governance controls, and produces tailored application materials only when compatibility meets a configurable threshold.
 
 Key Features:
 - Configurable minimum match threshold through GUI settings
@@ -64,13 +64,13 @@ python gui/tkinter_app.py
 
 ### Application Interface
 
-Main user interface of CareerForge AI showing the tabbed layout for job management, resume tailoring, and document export. The application features a modern UI with themed widgets and the new CareerForge AI icon.
+Main user interface of Threshold showing the tabbed layout for job management, resume tailoring, and document export. The application features a modern UI with themed widgets and the application icon.
 
 ![Application Interface](assets/CareerForge_AI.png)
 
 ### Workflow Diagram
 
-Visual representation of the CareerForge AI workflow from job analysis to tailored application materials.
+Visual representation of the Threshold workflow from job analysis to tailored application materials.
 
 ![Workflow Diagram](assets/workflow-diagram.png)
 
@@ -189,7 +189,7 @@ Common issues and solutions:
 
 ## Licensing
 
-CareerForge AI is available under two licensing options:
+Threshold is available under two licensing options:
 
 ### Open Source (MPL-2.0)
 - Free to use, modify, and distribute
