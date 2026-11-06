@@ -68,14 +68,6 @@ The Threshold application icon.
 
 ![Threshold logo](assets/Threshold.png)
 
-### Workflow Diagram
-
-Visual representation of the Threshold workflow from job analysis to tailored application materials.
-
-![Workflow Diagram](assets/workflow-diagram.png)
-
----
-
 ## How It Works
 
 ```mermaid
