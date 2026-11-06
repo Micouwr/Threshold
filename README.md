@@ -62,11 +62,11 @@ python gui/tkinter_app.py
 
 ## Visual Guides
 
-### Application Interface
+### Application Icon
 
-Main user interface of Threshold showing the tabbed layout for job management, resume tailoring, and document export. The application features a modern UI with themed widgets and the application icon.
+The Threshold application icon.
 
-![Application Interface](assets/CareerForge_AI.png)
+![Threshold logo](assets/CareerForge_AI.png)
 
 ### Workflow Diagram
 
