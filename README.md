@@ -20,23 +20,31 @@ The AI proposes. Rules and humans dispose.
 
 ---
 
-## Overview
+## Features
 
-Threshold analyzes job descriptions against a source resume, applies governance controls, and produces tailored application materials only when compatibility meets a configurable threshold.
+Grouped by the rule each one enforces:
 
-Key Features:
-- Configurable minimum match threshold through GUI settings
-- AI-powered resume compatibility scoring
-- Intelligent resume and cover letter tailoring
-- Job import from external sources (LinkedIn, Email, Plain Text)
-- Job description storage for future reference
-- Multiple export formats (PDF, Word, Plain Text, ATS-Optimized)
-- Role-based customization for different position levels
-- Enhanced custom prompt management with template validation
-- Built-in prompt examples and variable preview functionality
-- Professional PDF export capability
-- Modern, themed UI with improved visual design
-- Enhanced user experience with better layouts and styling
+### The threshold gate
+- Configurable minimum match threshold (slider 50-95%, default 80%)
+- Compatibility scoring returns a score, a verdict (STRONG, MODERATE, or WEAK), evidence, and gaps
+- Tailoring stays disabled until the score meets the threshold, and editing the resume, job description, or threshold invalidates a stored passing score
+- When the gate passes, the app tailors the resume and cover letter
+
+### Factual grounding
+- The AI uses only information from the source resume
+- A self-check in the prompt removes anything not supported by the original before outputting
+- No invented experience, no overselling
+
+### Output constraints
+- Fixed structure: standard sections, single column, no tables
+- Designed to fit 2 pages; if a PDF runs over, the app offers to condense it with grounded cuts you approve
+- Export as PDF, Word, plain text, or ATS-optimized
+
+### Also included
+- Job import from LinkedIn, email, or plain text, with job descriptions stored for later
+- Role-based customization: Standard, Senior, Lead, Principal
+- Custom prompt templates with validation, built-in examples, and variable preview
+- Modern themed interface
 
 ---
 
