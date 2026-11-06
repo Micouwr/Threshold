@@ -1,6 +1,11 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 from typing import List, Dict, Any
 import sqlite3
 from config.settings import DB_PATH
+from database import RESUMES_TABLE_SQL
 
 class ResumeModel:
     def __init__(self):
@@ -10,15 +15,7 @@ class ResumeModel:
     def _init_database(self):
         """Initialize resume table if not exists"""
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS resumes (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    file_path TEXT NOT NULL UNIQUE,
-                    is_active INTEGER DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            ''')
+            conn.execute(RESUMES_TABLE_SQL)
             conn.commit()
     
     def add_resume(self, file_path: str, name: str, is_active: bool = False) -> int:
@@ -60,6 +57,3 @@ class ResumeModel:
         with sqlite3.connect(self.db_path) as conn:
             conn.execute('DELETE FROM resumes WHERE file_path = ?', (file_path,))
             conn.commit()
-
-# Future-proofing: When upgrading to SQLAlchemy, inherit from declarative base
-# and add relationships, validation, etc.

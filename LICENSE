@@ -4,7 +4,7 @@ This project is available under two licensing options:
 
 1. Mozilla Public License Version 2.0 (MPL-2.0)
    - For open-source usage, available in LICENSE_MPL.md
-   - Requires modifications to be open-sourced
+   - File-level copyleft: changes to MPL-covered files must be shared under the MPL
    - Free to use, modify, and distribute
 
 2. Commercial License

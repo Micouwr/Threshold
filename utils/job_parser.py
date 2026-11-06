@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 """
 Job Description Parser Utilities
 Support for parsing job descriptions from various sources:
@@ -159,80 +163,6 @@ def parse_plain_text_job_description(text_content: str) -> Dict[str, str]:
     return job_data
 
 
-def extract_job_requirements(description: str) -> Dict[str, list]:
-    """
-    Extract common job requirements from job description.
-    
-    Args:
-        description (str): Job description text
-        
-    Returns:
-        Dict with extracted requirements:
-        - skills: Technical skills
-        - experience: Experience requirements
-        - education: Education requirements
-        - benefits: Benefits mentioned
-    """
-    requirements = {
-        'skills': [],
-        'experience': [],
-        'education': [],
-        'benefits': []
-    }
-    
-    # Convert to lowercase for easier matching
-    desc_lower = description.lower()
-    
-    # Common skill keywords
-    skill_keywords = [
-        'python', 'java', 'javascript', 'react', 'node.js', 'sql', 'docker', 'kubernetes',
-        'aws', 'azure', 'gcp', 'machine learning', 'ai', 'tensorflow', 'pytorch',
-        'html', 'css', 'angular', 'vue.js', 'spring', 'django', 'flask', 'rails',
-        'c++', 'c#', 'go', 'rust', 'scala', 'kotlin', 'swift', 'objective-c'
-    ]
-    
-    # Extract skills
-    for skill in skill_keywords:
-        if skill in desc_lower:
-            requirements['skills'].append(skill.title())
-    
-    # Extract experience requirements (X+ years patterns)
-    exp_patterns = [
-        r'(\d+)\s*\+?\s*(?:years?|yrs?)\s+(?:of\s+)?(?:experience|exp)',
-        r'(?:experience|exp)\s+(?:of\s+)?(\d+)\s*\+?\s*(?:years?|yrs?)'
-    ]
-    
-    for pattern in exp_patterns:
-        exp_matches = re.findall(pattern, desc_lower)
-        for match in exp_matches:
-            requirements['experience'].append(f"{match}+ years experience")
-    
-    # Extract education requirements
-    edu_patterns = [
-        r"(?:bachelor|master|ph\.?d|m\.?s|b\.?s)'?s?.*?(?:degree|in)",
-        r"(?:degree|diploma).*?(?:computer science|engineering|mathematics|statistics)",
-        r"(?:computer science|engineering|mathematics|statistics).*?(?:degree|diploma)"
-    ]
-    
-    for pattern in edu_patterns:
-        edu_match = re.search(pattern, desc_lower)
-        if edu_match:
-            requirements['education'].append(edu_match.group(0))
-    
-    # Extract benefits (simplified)
-    benefit_keywords = [
-        'health insurance', 'dental insurance', 'vision insurance', '401k', 'retirement plan',
-        'pto', 'paid time off', 'vacation', 'remote work', 'work from home',
-        'flexible hours', 'unlimited pto', 'stock options', 'bonus', 'competitive salary'
-    ]
-    
-    for benefit in benefit_keywords:
-        if benefit in desc_lower:
-            requirements['benefits'].append(benefit.title())
-    
-    return requirements
-
-
 # Example usage and testing
 if __name__ == "__main__":
     # Test with sample data
@@ -257,6 +187,3 @@ if __name__ == "__main__":
     print("Parsed LinkedIn job:")
     print(json.dumps(parsed, indent=2))
     
-    requirements = extract_job_requirements(parsed['description'])
-    print("\nExtracted requirements:")
-    print(json.dumps(requirements, indent=2))

@@ -28,12 +28,6 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Test scripts
-key_check.py
-precise_fix.py
-apply_fixes.py
-verify_all.py
-
 # Backup directories (local only)
 backup/
 

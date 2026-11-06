@@ -22,7 +22,7 @@ Subject to the terms and conditions of this Agreement, We grant You a non-exclus
 - No use in violation of applicable laws
 
 ### 4. Support and Updates
-- Priority email support during business hours
+- Community support through GitHub issues; no guaranteed response time
 - Access to software updates and new versions during the license term
 - Technical consultation (additional fees may apply)
 
@@ -32,7 +32,7 @@ Subject to the terms and conditions of this Agreement, We grant You a non-exclus
 - Upon termination, you must cease use and destroy all copies
 
 ### 6. Fees
-Commercial licensing fees are available upon request. Contact us at [your contact information] for pricing information.
+Commercial licensing fees are available upon request. Open an issue at https://github.com/Micouwr/job-application-bot for pricing information.
 
 ### 7. Warranty Disclaimer
 The software is provided "as is" without warranty of any kind. We disclaim all warranties, express or implied.
@@ -44,7 +44,7 @@ In no event shall we be liable for any damages arising from the use of this soft
 This Agreement shall be governed by the laws of [Your State/Country], without regard to conflict of law principles.
 
 ### 10. Contact
-For licensing inquiries, please contact: [your contact information]
+For licensing inquiries, open an issue at https://github.com/Micouwr/job-application-bot
 
 ---
 

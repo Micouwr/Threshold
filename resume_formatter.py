@@ -1,3 +1,7 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 """Resume formatter: parse structured AI resume output and render styled PDF/DOCX.
 
 The tailoring prompts instruct the model to output a strict structure:
@@ -24,7 +28,7 @@ def parse_structured_resume(text):
     Types: name, tagline, contact, section, job, job_meta, bullet, paragraph
     """
     lines = [ln.rstrip() for ln in text.split("\n")]
-    # Drop leading/trailing blank lines, collapse 3+ blanks to max 1 separator
+    # Drop leading/trailing blank lines; blank lines inside are skipped in the loop below
     stripped = [ln for ln in lines]
     while stripped and not stripped[0].strip():
         stripped.pop(0)

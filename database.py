@@ -1,5 +1,20 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
 import sqlite3
 from config.settings import DB_PATH
+
+# Single definition of the resumes table; models/resume_model.py uses this too
+RESUMES_TABLE_SQL = """
+    CREATE TABLE IF NOT EXISTS resumes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        file_path TEXT NOT NULL UNIQUE,
+        is_active INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+"""
 
 class DatabaseManager:
     def __init__(self):
@@ -96,15 +111,7 @@ class DatabaseManager:
                     )
                 ''')
             
-            conn.execute('''
-                CREATE TABLE IF NOT EXISTS resumes (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    file_path TEXT NOT NULL UNIQUE,
-                    is_active INTEGER DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            ''')
+            conn.execute(RESUMES_TABLE_SQL)
             
             conn.commit()
     
