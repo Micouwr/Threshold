@@ -53,6 +53,14 @@ Grouped by the rule each one enforces:
 
 ---
 
+## Evaluation
+
+First evaluation published 2026-11-05 ([docs/evaluation_results.md](docs/evaluation_results.md)): 1 sample, a condensed resume summary against a sample Senior Manager, Technical Operations job description. Overall score 95, verdict STRONG, 3 evidence items, 0 gaps, and the threshold gate passed (95 >= 80). Grounding held: nothing in the output came from outside the source resume.
+
+One sample is a start, not a benchmark. The next evaluations should cover a borderline posting and a clear mismatch, to test the WEAK path and below-threshold refusal.
+
+---
+
 ## Quick Start
 
 ### Step 1: Install Dependencies
