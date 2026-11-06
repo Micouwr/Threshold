@@ -40,6 +40,11 @@ Grouped by the rule each one enforces:
 - Designed to fit 2 pages; if a PDF runs over, the app offers to condense it with grounded cuts you approve
 - Export as PDF, Word, plain text, or ATS-optimized
 
+### Human review
+- You review the score, verdict, evidence, and gaps before tailoring runs
+- You review the tailored resume and cover letter before you use them
+- When a PDF runs over 2 pages, you choose which cuts to approve
+
 ### Also included
 - Job import from LinkedIn, email, or plain text, with job descriptions stored for later
 - Role-based customization: Standard, Senior, Lead, Principal
