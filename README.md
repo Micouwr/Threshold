@@ -78,6 +78,16 @@ Visual representation of the Threshold workflow from job analysis to tailored ap
 
 ## How It Works
 
+```mermaid
+flowchart TD
+    A[Resume + Job Description] --> B[Compatibility Analysis]
+    B --> C{Score meets threshold?}
+    C -- No --> D[Refuse: no tailoring]
+    C -- Yes --> E[Tailoring Engine]
+    E --> F[Grounding self-check]
+    F --> G[Output: tailored resume and cover letter]
+```
+
 ### 1. Analyze Job Compatibility
 - Paste the job description (minimum 100 characters)
 - Click "Analyze Match" to get your compatibility score
