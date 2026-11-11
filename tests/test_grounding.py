@@ -187,3 +187,65 @@ def test_empty_output():
     assert result["clean"] is False
     assert result["flags"] == []
     assert "error" in result
+
+
+def test_real_resume_en_dash_range():
+    # Ryan's real resume uses en dashes in date ranges, 2018-2025.
+    source = """WILLIAM RYAN MICOU
+## EXPERIENCE
+### Technical Operations Leader | CIMSystem
+Louisville, KY | 2018–2025
+- Built a Document360 knowledge base."""
+    facts = extract_source_facts(source)
+    assert [2018, 2025] in facts["date_ranges"]
+    assert 7 in facts["durations"]
+    tailored = """WILLIAM RYAN MICOU
+TECHNICAL OPERATIONS LEADER
+Louisville, KY | 555-0100 | ryan@example.com
+## PROFESSIONAL SUMMARY
+7 years leading technical operations."""
+    result = check_grounding(facts, tailored, target_company="Test Corp")
+    assert result["clean"], result["flags"]
+
+
+def test_real_resume_skills_label_format():
+    # Ryan's real resume skills are "Label: item, item" lines.
+    source = """WILLIAM RYAN MICOU
+TECHNICAL SKILLS
+Support & Collaboration: Freshdesk, Document360, ServiceNow, Microsoft 365
+Systems & Networking: Windows, Linux, Active Directory"""
+    facts = extract_source_facts(source)
+    assert "Freshdesk" in facts["skills"]
+    assert "Microsoft 365" in facts["skills"]
+    assert "Windows" in facts["skills"]
+    tailored = """WILLIAM RYAN MICOU
+TECHNICAL OPERATIONS LEADER
+Louisville, KY | 555-0100 | ryan@example.com
+## SKILLS
+Freshdesk, Document360, Microsoft 365, Windows"""
+    result = check_grounding(facts, tailored, target_company="Test Corp")
+    assert result["clean"], result["flags"]
+
+
+def test_real_resume_employer_filter():
+    # Tagline and GitHub lines must not become employers.
+    source = """WILLIAM RYAN MICOU
+TECHNICAL OPERATIONS & PROCESS IMPROVEMENT | AI-ENABLED WORKFLOWS
+Louisville, KY | github.com/Micouwr
+## EXPERIENCE
+### Technical Operations Leader | CIMSystem
+Louisville, KY | 2018–2025
+- Built a Document360 knowledge base."""
+    facts = extract_source_facts(source)
+    assert "CIMSystem" in facts["employers"]
+    assert "AI-ENABLED WORKFLOWS" not in facts["employers"]
+    assert not any("github" in e.lower() for e in facts["employers"])
+    tailored = """WILLIAM RYAN MICOU
+TECHNICAL OPERATIONS LEADER
+Louisville, KY | 555-0100 | ryan@example.com
+## EXPERIENCE
+### Technical Operations Leader | CIMSystem
+Louisville, KY | 2018 to 2025
+- Built a Document360 knowledge base."""
+    result = check_grounding(facts, tailored, target_company="Test Corp")
+    assert result["clean"], result["flags"]

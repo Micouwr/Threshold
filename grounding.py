@@ -43,7 +43,7 @@ SYNONYMS = {}
 
 _YEAR_RE = re.compile(r"\b(?:19|20)\d{2}\b")
 _RANGE_RE = re.compile(
-    r"\b((?:19|20)\d{2})\s*(?:to|-|-)\s*((?:19|20)\d{2}|Present|present)\b"
+    r"\b((?:19|20)\d{2})\s*(?:to|-|–|—)\s*((?:19|20)\d{2}|Present|present)\b"
 )
 _NUMBER_RE = re.compile(r"\b\d+(?:,\d{3})*(?:\.\d+)?\b")
 _PHONE_RE = re.compile(r"\(?\d{3}\)?[-. ]\d{3}[-. ]\d{4}")
@@ -139,6 +139,19 @@ def _employers_from_text(text):
                 continue
             if candidate.lower() in ("present", "unknown"):
                 continue
+            # Filter junk from taglines, contact lines, and sentences.
+            # Real company names in a resume do not contain a URL,
+            # a year, a period, or sit in an all caps tagline.
+            if ".com" in candidate.lower() or "github" in candidate.lower():
+                continue
+            if "http" in candidate.lower():
+                continue
+            if _YEAR_RE.search(candidate):
+                continue
+            if "." in candidate:
+                continue
+            if candidate.isupper() and " " in candidate:
+                continue
             key = candidate.lower()
             if key not in seen:
                 seen.add(key)
@@ -181,17 +194,22 @@ def _skills_from_text(text):
         return []
     skills = []
     seen = set()
-    joined = " ".join(collected)
-    # Split on commas, semicolons, bullets, and newlines.
-    for part in re.split(r"[,;•\n]+", joined):
-        token = part.strip().strip("* ").strip()
-        token = re.sub(r"\s+", " ", token)
-        if not token or len(token) > 60:
-            continue
-        key = token.lower()
-        if key not in seen:
-            seen.add(key)
-            skills.append(token)
+    # Process line by line. A line may be "Label: item, item" or
+    # just "item, item". Joining lines first merged labels with
+    # the next line, which created false skills.
+    for line in collected:
+        for part in re.split(r"[,;•]+", line):
+            token = part.strip().strip("* ").strip()
+            # Drop a leading label like "Support & Collaboration:".
+            if ":" in token:
+                token = token.split(":", 1)[-1].strip()
+            token = re.sub(r"\s+", " ", token)
+            if not token or len(token) > 60:
+                continue
+            key = token.lower()
+            if key not in seen:
+                seen.add(key)
+                skills.append(token)
     return skills
 
 
