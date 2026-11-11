@@ -8,6 +8,7 @@ import google.generativeai as genai
 from jinja2 import Environment, FileSystemLoader
 
 from config.settings import GEMINI_MODEL
+from grounding import check_grounding, extract_source_facts
 
 PROMPTS_DIR = Path(__file__).parent / "prompts" / "system"
 USER_PROMPTS_DIR = Path(__file__).parent / "prompts" / "user"
@@ -48,7 +49,8 @@ def process_and_tailor_from_gui(resume_text, job_description, role_level="Standa
         company_name: Company name (from GUI entry or AI extraction)
         
     Returns:
-        Dict with resume_text and cover_letter keys
+        Dict with resume_text, cover_letter, and grounding_flags keys.
+        grounding_flags is a list of warnings, empty when clean.
     """
     # Load prompt template
     if custom_prompt:
@@ -115,8 +117,28 @@ def process_and_tailor_from_gui(resume_text, job_description, role_level="Standa
     # Clean up any remaining delimiters
     resume_tailored = resume_tailored.replace("[TAILORING_COMPLETE]", "").strip()
     cover_letter = cover_letter.replace("[END_APPLICATION_MATERIALS]", "").strip()
-    
+
+    # Grounding check, code enforced. A flag is a warning, not a block.
+    # If the check itself fails, return one error flag so the user
+    # reviews it instead of saving silently.
+    try:
+        source_facts = extract_source_facts(resume_text)
+        grounding = check_grounding(
+            source_facts, resume_tailored, cover_letter,
+            target_company=company_name, target_job_title=job_title,
+        )
+        grounding_flags = grounding.get("flags", [])
+    except Exception as e:
+        grounding_flags = [{
+            "kind": "error",
+            "value": str(e),
+            "where": "resume",
+            "line": "",
+            "source_note": "grounding check failed, needs human review",
+        }]
+
     return {
         "resume_text": resume_tailored,
-        "cover_letter": cover_letter
+        "cover_letter": cover_letter,
+        "grounding_flags": grounding_flags,
     }

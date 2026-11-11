@@ -26,6 +26,7 @@ from database import DatabaseManager
 from tailor import process_and_tailor_from_gui
 from models.resume_model import ResumeModel
 from AI.match_analyzer import analyze_match, extract_job_details
+from grounding import check_grounding, extract_source_facts
 
 # Configure logging
 logging.basicConfig(
@@ -1735,7 +1736,8 @@ GAPS:
                 'result': result,
                 'job_title': job_title,
                 'company': company,
-                'job_description': job_description
+                'job_description': job_description,
+                'source_resume_text': resume_text
             })
             
         except Exception as e:
@@ -1767,8 +1769,44 @@ GAPS:
             if hasattr(self, 'match_data') and self.match_data:
                 match_score = self.match_data.get('overall_score', 0)
             
+            # Grounding review. No silent save when flags exist.
+            flags = list(result.get("grounding_flags", []) or [])
+            decision = "accepted"
+            rounds = 0
+            while flags and rounds < 5:
+                rounds += 1
+                choice, edited_resume, edited_cover = self._show_grounding_review(result, flags)
+                if choice == "cancel" or choice is None:
+                    decision = "cancelled"
+                    self._log_grounding_run(job_title, company, match_score, flags, decision, None)
+                    self.status_label.config(text="Ready", foreground="green")
+                    self._log_message("Tailoring cancelled after grounding review", "info")
+                    return
+                if choice == "edit":
+                    if not edited_resume or not edited_cover:
+                        decision = "cancelled"
+                        self._log_grounding_run(job_title, company, match_score, flags, decision, None)
+                        self.status_label.config(text="Ready", foreground="green")
+                        return
+                    result = {"resume_text": edited_resume, "cover_letter": edited_cover, "grounding_flags": flags}
+                    decision = "edited"
+                    try:
+                        source_facts = extract_source_facts(result_data.get("source_resume_text", ""))
+                        recheck = check_grounding(source_facts, edited_resume, edited_cover, target_company=company, target_job_title=job_title)
+                        flags = recheck.get("flags", [])
+                    except Exception as e:
+                        flags = [{"kind": "error", "value": str(e), "where": "resume", "line": "", "source_note": "grounding check failed, needs human review"}]
+                    continue
+                decision = "accepted"
+                break
+            if flags and decision != "accepted":
+                self._log_grounding_run(job_title, company, match_score, flags, "cancelled", None)
+                self.status_label.config(text="Ready", foreground="green")
+                messagebox.showinfo("Grounding review", "Still flagged after several edits. Nothing was saved.")
+                return
+
             # Save outputs
-            self.save_outputs(
+            output_paths = self.save_outputs(
                 result['resume_text'],
                 result['cover_letter'],
                 job_title,
@@ -1777,6 +1815,7 @@ GAPS:
                 match_score,
                 self.match_data  # Pass the full match summary data
             )
+            self._log_grounding_run(job_title, company, match_score, flags, decision, output_paths)
             
             # Clear fields
             self.clear_fields()
@@ -1792,7 +1831,130 @@ GAPS:
             return
         finally:
             self.set_ui_enabled(True)
-    
+
+    def _show_grounding_review(self, result, flags):
+        """Show grounding flags and ask what to do. Returns (choice, resume, cover)."""
+        outcome = {"choice": None, "resume": None, "cover": None}
+        dialog = tk.Toplevel(self.master)
+        dialog.title("Grounding check found flags")
+        dialog.geometry("700x500")
+        dialog.transient(self.master)
+        dialog.grab_set()
+
+        count = len(flags)
+        kinds = {}
+        for flag in flags:
+            kinds[flag.get("kind", "unknown")] = kinds.get(flag.get("kind", "unknown"), 0) + 1
+        summary = ", ".join(f"{n} {k}" for k, n in sorted(kinds.items()))
+        ttk.Label(
+            dialog,
+            text=f"The grounding check found {count} item(s) ({summary}) that do not match your source resume. These are warnings, not proof of an error. Review them before saving.",
+            wraplength=650,
+        ).pack(padx=15, pady=15, anchor=tk.W)
+
+        text = scrolledtext.ScrolledText(dialog, width=80, height=15, wrap=tk.WORD, font=("Arial", 10))
+        text.pack(padx=15, pady=5, fill=tk.BOTH, expand=True)
+        for flag in flags:
+            text.insert(tk.END, f"- {flag.get('kind', 'unknown')}: {flag.get('value', '')} ({flag.get('where', '')})\n")
+            if flag.get("line"):
+                text.insert(tk.END, f"  Line: {flag.get('line')}\n")
+            if flag.get("source_note"):
+                text.insert(tk.END, f"  Source: {flag.get('source_note')}\n")
+        text.config(state="disabled")
+
+        def choose_save():
+            outcome["choice"] = "save"
+            dialog.destroy()
+
+        def choose_edit():
+            edited = self._show_grounding_edit_dialog(result.get("resume_text", ""), result.get("cover_letter", ""))
+            if edited is None:
+                return
+            outcome["choice"] = "edit"
+            outcome["resume"], outcome["cover"] = edited
+            dialog.destroy()
+
+        def choose_cancel():
+            outcome["choice"] = "cancel"
+            dialog.destroy()
+
+        buttons = ttk.Frame(dialog)
+        buttons.pack(pady=15)
+        ttk.Button(buttons, text="Save as is, I accept these flags", command=choose_save).grid(row=0, column=0, padx=5)
+        ttk.Button(buttons, text="Edit before saving", command=choose_edit).grid(row=0, column=1, padx=5)
+        ttk.Button(buttons, text="Cancel", command=choose_cancel).grid(row=0, column=2, padx=5)
+
+        dialog.wait_window()
+        return outcome["choice"], outcome["resume"], outcome["cover"]
+
+    def _show_grounding_edit_dialog(self, resume_text, cover_letter):
+        """Let the user edit the tailored output. Returns (resume, cover) or None."""
+        outcome = {"resume": None, "cover": None}
+        dialog = tk.Toplevel(self.master)
+        dialog.title("Edit tailored output")
+        dialog.geometry("800x600")
+        dialog.transient(self.master)
+        dialog.grab_set()
+
+        ttk.Label(dialog, text="Tailored Resume", style="Bold.TLabel").pack(padx=15, pady=(15, 5), anchor=tk.W)
+        resume_box = scrolledtext.ScrolledText(dialog, width=90, height=12, wrap=tk.WORD, font=("Courier New", 10))
+        resume_box.pack(padx=15, pady=5, fill=tk.BOTH, expand=True)
+        resume_box.insert("1.0", resume_text)
+
+        ttk.Label(dialog, text="Cover Letter", style="Bold.TLabel").pack(padx=15, pady=(15, 5), anchor=tk.W)
+        cover_box = scrolledtext.ScrolledText(dialog, width=90, height=12, wrap=tk.WORD, font=("Courier New", 10))
+        cover_box.pack(padx=15, pady=5, fill=tk.BOTH, expand=True)
+        cover_box.insert("1.0", cover_letter)
+
+        def confirm():
+            outcome["resume"] = resume_box.get("1.0", tk.END).strip()
+            outcome["cover"] = cover_box.get("1.0", tk.END).strip()
+            dialog.destroy()
+
+        def cancel():
+            dialog.destroy()
+
+        buttons = ttk.Frame(dialog)
+        buttons.pack(pady=15)
+        ttk.Button(buttons, text="Check and save", command=confirm).grid(row=0, column=0, padx=5)
+        ttk.Button(buttons, text="Cancel edit", command=cancel).grid(row=0, column=1, padx=5)
+
+        dialog.wait_window()
+        if outcome["resume"] is None:
+            return None
+        return outcome["resume"], outcome["cover"]
+
+    def _log_grounding_run(self, job_title, company, match_score, flags, decision, output_paths):
+        """Append one JSONL record per tailoring run. No resume or job text."""
+        try:
+            counts = {}
+            for flag in flags or []:
+                kind = flag.get("kind", "unknown")
+                counts[kind] = counts.get(kind, 0) + 1
+            resume_path = None
+            try:
+                active = self.resume_model.get_active_resume()
+                if active:
+                    resume_path = active.get("file_path")
+            except Exception:
+                resume_path = None
+            record = {
+                "timestamp": datetime.now().isoformat(),
+                "job_title": job_title,
+                "company": company,
+                "resume_path": resume_path,
+                "match_score": match_score,
+                "flag_counts": counts,
+                "decision": decision,
+                "output_paths": output_paths,
+            }
+            log_dir = project_root / "database"
+            log_dir.mkdir(parents=True, exist_ok=True)
+            with open(log_dir / "grounding_log.jsonl", "a", encoding="utf-8") as f:
+                f.write(json.dumps(record) + "\n")
+        except Exception as e:
+            self._log_message(f"Grounding log write failed: {e}", "warning")
+
     def _create_import_tab(self):
         """Create the Job Import tab for importing from LinkedIn, email, etc."""
         tab = ttk.Frame(self.notebook)
@@ -2876,6 +3038,7 @@ COVER LETTER
             )
             
             self._log_message(f"Files saved: {base_name}_*.txt", "info")
+            return [str(resume_path), str(cover_letter_path), str(job_description_path)]
         except Exception as e:
             self._log_message(f"Error saving files: {e}", "error")
             raise
